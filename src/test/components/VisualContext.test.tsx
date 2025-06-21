@@ -27,19 +27,29 @@ Object.defineProperty(window, "open", {
 });
 
 describe("VisualContext", () => {
+  const defaultProps = {
+    images: mockImages,
+    word: "test",
+    isLoading: false,
+    currentPage: 1,
+    totalPages: 3,
+    onPageChange: vi.fn(),
+  };
+
   beforeEach(() => {
     mockOpen.mockClear();
+    vi.clearAllMocks();
   });
 
   it("renders visual context title and search link", () => {
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     expect(screen.getByText("Visual Context")).toBeInTheDocument();
     expect(screen.getByText("Search Google Images")).toBeInTheDocument();
   });
 
   it("renders images in 3x2 grid", () => {
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     const images = screen.getAllByRole("img");
     expect(images).toHaveLength(2);
@@ -49,7 +59,7 @@ describe("VisualContext", () => {
   });
 
   it("shows loading skeletons when isLoading is true", () => {
-    render(<VisualContext images={[]} word="test" isLoading={true} />);
+    render(<VisualContext {...defaultProps} images={[]} isLoading={true} />);
 
     const skeletons = document.querySelectorAll(".animate-pulse");
     expect(skeletons).toHaveLength(6); // 6 image placeholders
@@ -57,7 +67,7 @@ describe("VisualContext", () => {
 
   it("handles image click without errors", async () => {
     const user = userEvent.setup();
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     const imageContainer = screen.getAllByRole("img")[0].closest("div");
 
@@ -69,7 +79,7 @@ describe("VisualContext", () => {
 
   it("opens Google Images search when search link is clicked", async () => {
     const user = userEvent.setup();
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     const searchLink = screen.getByText("Search Google Images");
     await user.click(searchLink);
@@ -81,14 +91,14 @@ describe("VisualContext", () => {
   });
 
   it("renders images with hover effects", () => {
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     const imageContainers = document.querySelectorAll(".group");
     expect(imageContainers).toHaveLength(2);
   });
 
   it("shows hover effects on images", () => {
-    render(<VisualContext images={mockImages} word="test" isLoading={false} />);
+    render(<VisualContext {...defaultProps} />);
 
     const imageContainers = document.querySelectorAll(".group");
     expect(imageContainers).toHaveLength(2);
@@ -96,5 +106,31 @@ describe("VisualContext", () => {
     imageContainers.forEach((container) => {
       expect(container).toHaveClass("hover:ring-2", "hover:ring-primary-500");
     });
+  });
+
+  it("renders pagination controls", () => {
+    render(<VisualContext {...defaultProps} />);
+
+    expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
+    expect(screen.getByText("Previous")).toBeInTheDocument();
+    expect(screen.getByText("Next")).toBeInTheDocument();
+  });
+
+  it("calls onPageChange when pagination is used", async () => {
+    const user = userEvent.setup();
+    const onPageChange = vi.fn();
+    render(<VisualContext {...defaultProps} onPageChange={onPageChange} />);
+
+    const nextButton = screen.getByText("Next");
+    await user.click(nextButton);
+
+    expect(onPageChange).toHaveBeenCalledWith(2);
+  });
+
+  it("does not render pagination when totalPages is 1", () => {
+    render(<VisualContext {...defaultProps} totalPages={1} />);
+
+    expect(screen.queryByText("Previous")).not.toBeInTheDocument();
+    expect(screen.queryByText("Next")).not.toBeInTheDocument();
   });
 });

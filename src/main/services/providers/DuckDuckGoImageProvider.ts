@@ -1,4 +1,4 @@
-import type { ImageResult } from "@shared/types";
+import type { ImageResult, PaginationOptions } from "@shared/types";
 
 export class DuckDuckGoImageProvider {
   private readonly baseUrl = "https://api.duckduckgo.com/";
@@ -55,6 +55,7 @@ export class DuckDuckGoImageProvider {
   async searchImages(
     query: string,
     safeSearch: boolean = true,
+    pagination?: PaginationOptions,
   ): Promise<ImageResult[]> {
     try {
       const searchUrl = new URL(this.baseUrl);
@@ -89,7 +90,7 @@ export class DuckDuckGoImageProvider {
       // For now, let's implement a basic image search using their search results
 
       // Alternative approach: Use DuckDuckGo's image search endpoint
-      return await this.searchImagesAlternative(query, safeSearch);
+      return await this.searchImagesAlternative(query, safeSearch, pagination);
     } catch (error) {
       console.error("DuckDuckGo image search error:", error);
       throw error;
@@ -99,17 +100,21 @@ export class DuckDuckGoImageProvider {
   private async searchImagesAlternative(
     query: string,
     safeSearch: boolean,
+    pagination?: PaginationOptions,
   ): Promise<ImageResult[]> {
     try {
       // DuckDuckGo doesn't have a public image API, but we can use their search endpoint
       // with a different approach to get image data
 
       // Use DuckDuckGo's search with specific parameters for images
+      const { page = 1, perPage = 6 } = pagination || {};
+      const startIndex = (page - 1) * perPage;
+
       const searchUrl = new URL("https://duckduckgo.com/i.js");
       searchUrl.searchParams.set("q", query);
       searchUrl.searchParams.set("o", "json");
       searchUrl.searchParams.set("p", safeSearch ? "1" : "-1");
-      searchUrl.searchParams.set("s", "0");
+      searchUrl.searchParams.set("s", startIndex.toString());
       searchUrl.searchParams.set("u", "bing");
       searchUrl.searchParams.set("f", ",,,");
       searchUrl.searchParams.set("l", "us-en");
@@ -125,7 +130,7 @@ export class DuckDuckGoImageProvider {
 
       if (!response.ok) {
         console.warn("DuckDuckGo image search failed, using Unsplash fallback");
-        return this.getUnsplashImages(query);
+        return this.getUnsplashImages(query, pagination);
       }
 
       const data = await response.json();
@@ -133,7 +138,7 @@ export class DuckDuckGoImageProvider {
       // Parse DuckDuckGo response format
       if (data && data.results && Array.isArray(data.results)) {
         const images: ImageResult[] = data.results
-          .slice(0, 6)
+          .slice(0, perPage)
           .map((item: any, index: number) => ({
             url:
               item.image ||
@@ -149,19 +154,25 @@ export class DuckDuckGoImageProvider {
       }
 
       // Fallback to Unsplash if DuckDuckGo format is unexpected
-      return this.getUnsplashImages(query);
+      return this.getUnsplashImages(query, pagination);
     } catch (error) {
       console.error("DuckDuckGo image search error:", error);
-      return this.getUnsplashImages(query);
+      return this.getUnsplashImages(query, pagination);
     }
   }
 
-  private getUnsplashImages(query: string): ImageResult[] {
+  private getUnsplashImages(
+    query: string,
+    pagination?: PaginationOptions,
+  ): ImageResult[] {
     // Fallback to Unsplash images
-    return Array.from({ length: 6 }, (_, i) => ({
-      url: `https://source.unsplash.com/400x300/?${encodeURIComponent(query)}&${i}`,
-      thumbnail: `https://source.unsplash.com/200x150/?${encodeURIComponent(query)}&${i}`,
-      title: `${query} - Image ${i + 1}`,
+    const { page = 1, perPage = 6 } = pagination || {};
+    const startIndex = (page - 1) * perPage;
+
+    return Array.from({ length: perPage }, (_, i) => ({
+      url: `https://source.unsplash.com/400x300/?${encodeURIComponent(query)}&${startIndex + i}`,
+      thumbnail: `https://source.unsplash.com/200x150/?${encodeURIComponent(query)}&${startIndex + i}`,
+      title: `${query} - Image ${startIndex + i + 1}`,
       source: "unsplash.com (fallback)",
     }));
   }

@@ -6,11 +6,18 @@ import VisualContext from "./components/VisualContext";
 import ExamplePhrases from "./components/ExamplePhrases";
 import SettingsModal from "./components/SettingsModal";
 import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
-import type { SearchResult } from "@shared/types";
+import type {
+  SearchResult,
+  PaginatedImageResult,
+  PaginationOptions,
+} from "@shared/types";
 
 function App() {
   const [currentWord, setCurrentWord] = useState<string>("");
   const [searchResult, setSearchResult] = useState<SearchResult | undefined>();
+  const [paginatedImages, setPaginatedImages] = useState<
+    PaginatedImageResult | undefined
+  >();
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -22,6 +29,7 @@ function App() {
     setIsLoading(true);
     setCurrentWord(word);
     setExplanation(null); // Reset explanation
+    setPaginatedImages(undefined); // Reset pagination
 
     try {
       // Add to search history
@@ -29,13 +37,22 @@ function App() {
 
       // Fetch images, phrases, and explanation in parallel with independent error handling
       const [images, phrases, wordExplanation] = await Promise.allSettled([
-        window.electronAPI.searchImages(word),
+        window.electronAPI.searchImages(word, { page: 1, perPage: 6 }),
         window.electronAPI.generatePhrases(word),
         window.electronAPI.generateExplanation(word),
       ]);
 
       // Handle images result
-      const imageResults = images.status === "fulfilled" ? images.value : [];
+      const imageResults =
+        images.status === "fulfilled"
+          ? images.value
+          : {
+              images: [],
+              currentPage: 1,
+              totalPages: 1,
+              hasNext: false,
+              hasPrevious: false,
+            };
 
       // Handle phrases result
       const phraseResults = phrases.status === "fulfilled" ? phrases.value : [];
@@ -55,14 +72,42 @@ function App() {
         console.error("Explanation generation failed:", wordExplanation.reason);
       }
 
+      setPaginatedImages(imageResults);
       setSearchResult({
         word,
-        images: imageResults,
+        images: imageResults.images,
         phrases: phraseResults,
       });
       setExplanation(explanationResult);
     } catch (error) {
       console.error("Search failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePageChange = async (page: number) => {
+    if (!currentWord || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const imageResult = await window.electronAPI.searchImages(currentWord, {
+        page,
+        perPage: 6,
+      });
+
+      setPaginatedImages(imageResult);
+      setSearchResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              images: imageResult.images,
+            }
+          : undefined,
+      );
+    } catch (error) {
+      console.error("Page change failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -168,12 +213,15 @@ function App() {
             />
 
             {/* Images and Phrases Grid */}
-            {searchResult && (
+            {searchResult && paginatedImages && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <VisualContext
                   images={searchResult.images}
                   word={currentWord}
                   isLoading={isLoading}
+                  currentPage={paginatedImages.currentPage}
+                  totalPages={paginatedImages.totalPages}
+                  onPageChange={handlePageChange}
                 />
 
                 <ExamplePhrases

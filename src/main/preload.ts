@@ -5,12 +5,14 @@ import type {
   ImageResult,
   AppSettings,
   ElectronAPI,
+  PaginationOptions,
 } from "@shared/types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   searchHistory: () => ipcRenderer.invoke("search-history"),
   addSearch: (word: string) => ipcRenderer.invoke("add-search", word),
-  searchImages: (word: string) => ipcRenderer.invoke("search-images", word),
+  searchImages: (word: string, options?: PaginationOptions) =>
+    ipcRenderer.invoke("search-images", word, options),
   generatePhrases: (word: string) =>
     ipcRenderer.invoke("generate-phrases", word),
   generateExplanation: (word: string) =>

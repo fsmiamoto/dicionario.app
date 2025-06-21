@@ -1,4 +1,4 @@
-import type { ImageResult } from "@shared/types";
+import type { ImageResult, PaginationOptions } from "@shared/types";
 
 export class PixabayImageProvider {
   private readonly baseUrl = "https://pixabay.com/api/";
@@ -51,12 +51,18 @@ export class PixabayImageProvider {
     });
   }
 
-  async searchImages(query: string, apiKey?: string): Promise<ImageResult[]> {
+  async searchImages(
+    query: string,
+    apiKey?: string,
+    pagination?: PaginationOptions,
+  ): Promise<ImageResult[]> {
     try {
       if (!apiKey) {
         // Return curated images without API key using different approach
-        return this.getFallbackImages(query);
+        return this.getFallbackImages(query, pagination);
       }
+
+      const { page = 1, perPage = 6 } = pagination || {};
 
       const searchUrl = new URL(this.baseUrl);
       searchUrl.searchParams.set("key", apiKey);
@@ -64,7 +70,8 @@ export class PixabayImageProvider {
       searchUrl.searchParams.set("image_type", "photo");
       searchUrl.searchParams.set("category", "all");
       searchUrl.searchParams.set("safesearch", "true");
-      searchUrl.searchParams.set("per_page", "6");
+      searchUrl.searchParams.set("per_page", perPage.toString());
+      searchUrl.searchParams.set("page", page.toString());
       searchUrl.searchParams.set("min_width", "200");
       searchUrl.searchParams.set("min_height", "150");
 
@@ -95,14 +102,17 @@ export class PixabayImageProvider {
         source: "pixabay.com",
       }));
 
-      return images.slice(0, 6);
+      return images.slice(0, perPage);
     } catch (error) {
       console.error("Pixabay image search error:", error);
-      return this.getFallbackImages(query);
+      return this.getFallbackImages(query, pagination);
     }
   }
 
-  private getFallbackImages(query: string): ImageResult[] {
+  private getFallbackImages(
+    query: string,
+    pagination?: PaginationOptions,
+  ): ImageResult[] {
     // Use multiple fallback services for better variety
     const services = [
       "https://source.unsplash.com/400x300/?",
@@ -110,7 +120,10 @@ export class PixabayImageProvider {
       "https://loremflickr.com/400/300/",
     ];
 
-    return Array.from({ length: 6 }, (_, i) => {
+    const { page = 1, perPage = 6 } = pagination || {};
+    const startIndex = (page - 1) * perPage;
+
+    return Array.from({ length: perPage }, (_, i) => {
       const serviceIndex = i % services.length;
       const service = services[serviceIndex];
       const randomParam = Math.floor(Math.random() * 1000);
@@ -122,7 +135,7 @@ export class PixabayImageProvider {
           : service.includes("picsum")
             ? `https://picsum.photos/200/150?random=${randomParam}`
             : `https://loremflickr.com/200/150/${encodeURIComponent(query)}?random=${randomParam}`,
-        title: `${query} - Image ${i + 1}`,
+        title: `${query} - Image ${startIndex + i + 1}`,
         source: service.includes("unsplash")
           ? "unsplash.com"
           : service.includes("picsum")

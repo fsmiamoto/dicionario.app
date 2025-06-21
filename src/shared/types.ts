@@ -19,6 +19,19 @@ export interface ImageResult {
   source?: string;
 }
 
+export interface PaginationOptions {
+  page: number;
+  perPage: number;
+}
+
+export interface PaginatedImageResult {
+  images: ImageResult[];
+  currentPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface SearchResult {
   word: string;
   images: ImageResult[];
@@ -43,7 +56,10 @@ export interface AppSettings {
 export interface ElectronAPI {
   searchHistory: () => Promise<SearchHistory[]>;
   addSearch: (word: string) => Promise<void>;
-  searchImages: (word: string) => Promise<ImageResult[]>;
+  searchImages: (
+    word: string,
+    options?: PaginationOptions,
+  ) => Promise<PaginatedImageResult>;
   generatePhrases: (word: string) => Promise<ExamplePhrase[]>;
   generateExplanation: (word: string) => Promise<string | null>;
   generateAudio: (text: string, language: string) => Promise<string>;

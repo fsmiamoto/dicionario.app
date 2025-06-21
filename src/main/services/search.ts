@@ -1,4 +1,10 @@
-import type { ImageResult, ExamplePhrase, AppSettings } from "@shared/types";
+import type {
+  ImageResult,
+  ExamplePhrase,
+  AppSettings,
+  PaginationOptions,
+  PaginatedImageResult,
+} from "@shared/types";
 import { OpenAIProvider } from "./providers/OpenAIProvider";
 import { DuckDuckGoImageProvider } from "./providers/DuckDuckGoImageProvider";
 import { GoogleImageProvider } from "./providers/GoogleImageProvider";
@@ -20,9 +26,12 @@ export class SearchService {
   async searchImages(
     word: string,
     settings?: AppSettings,
-  ): Promise<ImageResult[]> {
+    options?: PaginationOptions,
+  ): Promise<PaginatedImageResult> {
+    const provider = settings?.imageSearchProvider || "auto";
+    const pagination = options || { page: 1, perPage: 6 };
+
     try {
-      const provider = settings?.imageSearchProvider || "auto";
 
       // Determine which provider to use
       if (
@@ -32,11 +41,14 @@ export class SearchService {
       ) {
         try {
           console.log("Attempting Google Custom Search for:", word);
-          return await this.googleImages.searchImages(
+          const images = await this.googleImages.searchImages(
             word,
             settings.googleApiKey,
             settings.googleSearchEngineId,
+            true,
+            pagination,
           );
+          return this.formatPaginatedResult(images, pagination);
         } catch (error) {
           console.warn(
             "Google Images search failed, falling back to DuckDuckGo:",
@@ -47,7 +59,12 @@ export class SearchService {
 
       if (provider === "pixabay" && settings?.pixabayApiKey) {
         try {
-          return await this.pixabay.searchImages(word, settings.pixabayApiKey);
+          const images = await this.pixabay.searchImages(
+            word,
+            settings.pixabayApiKey,
+            pagination,
+          );
+          return this.formatPaginatedResult(images, pagination);
         } catch (error) {
           console.warn(
             "Pixabay search failed, falling back to DuckDuckGo:",
@@ -58,18 +75,26 @@ export class SearchService {
 
       if (provider === "duckduckgo" || provider === "auto") {
         try {
-          return await this.duckDuckGo.searchImages(word);
+          const images = await this.duckDuckGo.searchImages(
+            word,
+            true,
+            pagination,
+          );
+          return this.formatPaginatedResult(images, pagination);
         } catch (error) {
           console.warn("DuckDuckGo search failed:", error);
 
           // Try Google as fallback if available
           if (settings?.googleApiKey && settings?.googleSearchEngineId) {
             try {
-              return await this.googleImages.searchImages(
+              const images = await this.googleImages.searchImages(
                 word,
                 settings.googleApiKey,
                 settings.googleSearchEngineId,
+                true,
+                pagination,
               );
+              return this.formatPaginatedResult(images, pagination);
             } catch (googleError) {
               console.warn("Google Images fallback also failed:", googleError);
             }
@@ -79,10 +104,12 @@ export class SearchService {
 
       // Final fallback to mock data
       console.log("All image search providers failed, using mock data");
-      return this.getMockImages(word);
+      const mockImages = this.getMockImages(word, pagination);
+      return this.formatPaginatedResult(mockImages, pagination);
     } catch (error) {
       console.error("Image search error:", error);
-      return this.getMockImages(word);
+      const mockImages = this.getMockImages(word, pagination);
+      return this.formatPaginatedResult(mockImages, pagination);
     }
   }
 
@@ -160,13 +187,37 @@ export class SearchService {
     }
   }
 
-  private getMockImages(word: string): ImageResult[] {
-    return Array.from({ length: 6 }, (_, i) => ({
-      url: `https://picsum.photos/400/300?random=${word}-${i}`,
-      thumbnail: `https://picsum.photos/200/150?random=${word}-${i}`,
-      title: `${word} image ${i + 1}`,
+  private getMockImages(
+    word: string,
+    pagination?: PaginationOptions,
+  ): ImageResult[] {
+    const { page = 1, perPage = 6 } = pagination || {};
+    const startIndex = (page - 1) * perPage;
+
+    return Array.from({ length: perPage }, (_, i) => ({
+      url: `https://picsum.photos/400/300?random=${word}-${startIndex + i}`,
+      thumbnail: `https://picsum.photos/200/150?random=${word}-${startIndex + i}`,
+      title: `${word} image ${startIndex + i + 1}`,
       source: "picsum.photos (mock)",
     }));
+  }
+
+  private formatPaginatedResult(
+    images: ImageResult[],
+    pagination: PaginationOptions,
+  ): PaginatedImageResult {
+    const { page, perPage } = pagination;
+    // For simplicity, we'll assume 5 pages maximum for most searches
+    // In a real implementation, you'd get this from the API response
+    const totalPages = Math.min(5, Math.max(1, Math.ceil(30 / perPage)));
+
+    return {
+      images,
+      currentPage: page,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
   }
 
   private getMockPhrases(word: string, language?: string): ExamplePhrase[] {

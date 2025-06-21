@@ -1,4 +1,4 @@
-import type { ImageResult } from "@shared/types";
+import type { ImageResult, PaginationOptions } from "@shared/types";
 
 export class GoogleImageProvider {
   private readonly baseUrl = "https://www.googleapis.com/customsearch/v1";
@@ -56,6 +56,7 @@ export class GoogleImageProvider {
     apiKey: string,
     searchEngineId: string,
     safeSearch: boolean = true,
+    pagination?: PaginationOptions,
   ): Promise<ImageResult[]> {
     try {
       if (!apiKey || !searchEngineId) {
@@ -67,12 +68,16 @@ export class GoogleImageProvider {
       // Skip credential validation to avoid double API calls
 
       // Use the most minimal parameters possible
+      const { page = 1, perPage = 6 } = pagination || {};
+      const start = (page - 1) * perPage + 1; // Google uses 1-based indexing
+
       const searchParams = new URLSearchParams({
         key: apiKey,
         cx: searchEngineId,
         q: query,
         searchType: "image",
-        num: "6",
+        num: perPage.toString(),
+        start: start.toString(),
       });
 
       // Only add safe search if explicitly enabled
@@ -105,7 +110,13 @@ export class GoogleImageProvider {
         // If it's a 400 error, try without safe search
         if (response.status === 400 && safeSearch) {
           console.log("Retrying without safe search parameter...");
-          return this.searchImages(query, apiKey, searchEngineId, false);
+          return this.searchImages(
+            query,
+            apiKey,
+            searchEngineId,
+            false,
+            pagination,
+          );
         }
 
         throw new Error(
@@ -127,7 +138,7 @@ export class GoogleImageProvider {
         source: this.extractDomain(item.displayLink || item.link),
       }));
 
-      return images.slice(0, 6); // Ensure we return exactly 6 images
+      return images.slice(0, perPage); // Return requested number of images
     } catch (error) {
       console.error("Google Custom Search image search error:", error);
       throw error;

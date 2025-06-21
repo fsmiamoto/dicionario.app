@@ -78,9 +78,9 @@ ipcMain.handle("add-search", async (_, word: string) => {
   return dbService.addSearch(word);
 });
 
-ipcMain.handle("search-images", async (_, word: string) => {
+ipcMain.handle("search-images", async (_, word: string, options?: any) => {
   const settings = await dbService.getSettings();
-  return searchService.searchImages(word, settings);
+  return searchService.searchImages(word, settings, options);
 });
 
 ipcMain.handle("generate-phrases", async (_, word: string) => {

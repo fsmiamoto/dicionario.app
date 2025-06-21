@@ -1,16 +1,23 @@
 import React from "react";
 import type { ImageResult } from "@shared/types";
+import Pagination from "./Pagination";
 
 interface VisualContextProps {
   images: ImageResult[];
   word: string;
   isLoading: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 const VisualContext: React.FC<VisualContextProps> = ({
   images,
   word,
   isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
 }) => {
   const handleImageClick = (image: ImageResult) => {
     // Copy image URL to clipboard
@@ -77,7 +84,7 @@ const VisualContext: React.FC<VisualContextProps> = ({
         </div>
       ) : (
         <div className="grid grid-cols-3 grid-rows-2 gap-3 aspect-[3/2]">
-          {images.slice(0, 6).map((image, index) => (
+          {images.map((image, index) => (
             <div
               key={index}
               className="relative bg-surface-300 rounded-lg overflow-hidden cursor-pointer group hover:ring-2 hover:ring-primary-500 transition-all"
@@ -108,6 +115,13 @@ const VisualContext: React.FC<VisualContextProps> = ({
           ))}
         </div>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
