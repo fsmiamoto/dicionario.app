@@ -3,6 +3,7 @@ import type { ExamplePhrase } from "@shared/types";
 
 export class OpenAIProvider {
   private client: OpenAI | null = null;
+  private MODEL = "gpt-4.1-nano"
 
   private initializeClient(apiKey: string): void {
     if (!this.client || this.client.apiKey !== apiKey) {
@@ -53,7 +54,7 @@ Return ONLY valid JSON in this exact format:
       const userPrompt = `Generate 5 example sentences for the word: "${word}"`;
 
       const completion = await this.client.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: this.MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -154,7 +155,7 @@ Format your response as plain text, well-structured with natural paragraph break
       const userPrompt = `Explain the word or expression: "${word}" in english`;
 
       const completion = await this.client.chat.completions.create({
-        model: "gpt-4.1-nano",
+        model: this.MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
