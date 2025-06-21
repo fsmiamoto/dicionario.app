@@ -247,7 +247,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         {/* Help Text */}
         <div className="mt-6 p-4 bg-surface-300 rounded-lg">
           <p className="text-sm text-dark-400">
-            <strong className="text-white">Note:</strong> API keys are stored locally and are only used to enhance functionality. 
+            <strong className="text-white">Note:</strong> API keys are stored locally and are only used to enhance functionality.
             The app works with mock data when no keys are provided.
           </p>
         </div>

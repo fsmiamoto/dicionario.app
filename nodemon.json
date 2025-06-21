@@ -1,0 +1,9 @@
+{
+  "watch": ["src/main/**/*"],
+  "ext": "ts,js,json",
+  "ignore": ["src/renderer/**/*", "dist/**/*", "node_modules/**/*"],
+  "exec": "tsc -p src/main/tsconfig.json && electron .",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

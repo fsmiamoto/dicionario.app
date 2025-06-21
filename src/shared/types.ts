@@ -39,3 +39,15 @@ export interface AppSettings {
     voice?: string;
   };
 }
+
+export interface ElectronAPI {
+  searchHistory: () => Promise<SearchHistory[]>;
+  addSearch: (word: string) => Promise<void>;
+  searchImages: (word: string) => Promise<ImageResult[]>;
+  generatePhrases: (word: string) => Promise<ExamplePhrase[]>;
+  generateExplanation: (word: string) => Promise<string | null>;
+  generateAudio: (text: string, language: string) => Promise<string>;
+  getSettings: () => Promise<AppSettings>;
+  saveSettings: (settings: AppSettings) => Promise<void>;
+  validateApiKeys: () => Promise<{ openai: boolean; google: boolean; pixabay: boolean }>;
+}
