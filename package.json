@@ -14,6 +14,7 @@
     "electron": "NODE_ENV=development electron .",
     "electron:prod": "electron .",
     "pack": "electron-builder",
+    "format": "prettier --write src/**/*",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
@@ -25,7 +26,7 @@
     "electron",
     "education"
   ],
-  "author": "Your Name",
+  "author": "Flavio Miyamoto",
   "license": "MIT",
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",
@@ -50,6 +51,7 @@
     "nodemon": "^3.1.10",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
+    "prettier": "^3.5.3",
     "typescript": "^5.3.2",
     "vite": "^5.0.5",
     "vitest": "^1.0.4"

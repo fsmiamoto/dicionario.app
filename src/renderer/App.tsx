@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Header from './components/Header';
-import SearchBar, { type SearchBarRef } from './components/SearchBar';
-import WordExplanation from './components/WordExplanation';
-import VisualContext from './components/VisualContext';
-import ExamplePhrases from './components/ExamplePhrases';
-import SettingsModal from './components/SettingsModal';
-import { handleKeyboardShortcut, getModifierKey } from './utils/keyboard';
-import type { SearchResult } from '@shared/types';
+import React, { useState, useRef, useEffect } from "react";
+import Header from "./components/Header";
+import SearchBar, { type SearchBarRef } from "./components/SearchBar";
+import WordExplanation from "./components/WordExplanation";
+import VisualContext from "./components/VisualContext";
+import ExamplePhrases from "./components/ExamplePhrases";
+import SettingsModal from "./components/SettingsModal";
+import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
+import type { SearchResult } from "@shared/types";
 
 function App() {
-  const [currentWord, setCurrentWord] = useState<string>('');
+  const [currentWord, setCurrentWord] = useState<string>("");
   const [searchResult, setSearchResult] = useState<SearchResult | undefined>();
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,37 +31,38 @@ function App() {
       const [images, phrases, wordExplanation] = await Promise.allSettled([
         window.electronAPI.searchImages(word),
         window.electronAPI.generatePhrases(word),
-        window.electronAPI.generateExplanation(word)
+        window.electronAPI.generateExplanation(word),
       ]);
 
       // Handle images result
-      const imageResults = images.status === 'fulfilled' ? images.value : [];
-      
+      const imageResults = images.status === "fulfilled" ? images.value : [];
+
       // Handle phrases result
-      const phraseResults = phrases.status === 'fulfilled' ? phrases.value : [];
-      
+      const phraseResults = phrases.status === "fulfilled" ? phrases.value : [];
+
       // Handle explanation result
-      const explanationResult = wordExplanation.status === 'fulfilled' ? wordExplanation.value : null;
+      const explanationResult =
+        wordExplanation.status === "fulfilled" ? wordExplanation.value : null;
 
       // Log any failures for debugging
-      if (images.status === 'rejected') {
-        console.error('Images search failed:', images.reason);
+      if (images.status === "rejected") {
+        console.error("Images search failed:", images.reason);
       }
-      if (phrases.status === 'rejected') {
-        console.error('Phrases generation failed:', phrases.reason);
+      if (phrases.status === "rejected") {
+        console.error("Phrases generation failed:", phrases.reason);
       }
-      if (wordExplanation.status === 'rejected') {
-        console.error('Explanation generation failed:', wordExplanation.reason);
+      if (wordExplanation.status === "rejected") {
+        console.error("Explanation generation failed:", wordExplanation.reason);
       }
 
       setSearchResult({
         word,
         images: imageResults,
-        phrases: phraseResults
+        phrases: phraseResults,
       });
       setExplanation(explanationResult);
     } catch (error) {
-      console.error('Search failed:', error);
+      console.error("Search failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +78,7 @@ function App() {
     try {
       // Check if clipboard API is available
       if (!navigator.clipboard || !navigator.clipboard.readText) {
-        console.warn('Clipboard API not available');
+        console.warn("Clipboard API not available");
         return;
       }
 
@@ -88,14 +89,18 @@ function App() {
         // Set the search query
         searchBarRef.current?.setQuery(trimmedText);
         searchBarRef.current?.focus();
-        
+
         // Automatically trigger search if the text looks like a single word or short phrase
-        if (trimmedText.length > 0 && trimmedText.length < 100 && !trimmedText.includes('\n')) {
+        if (
+          trimmedText.length > 0 &&
+          trimmedText.length < 100 &&
+          !trimmedText.includes("\n")
+        ) {
           handleSearch(trimmedText);
         }
       }
     } catch (error) {
-      console.error('Failed to read clipboard:', error);
+      console.error("Failed to read clipboard:", error);
     }
   };
 
@@ -104,32 +109,35 @@ function App() {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Skip if user is typing in an input field (except for our paste shortcut)
       const target = event.target as HTMLElement;
-      const isInInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true';
-      
-      if (isInInput && event.key.toLowerCase() !== 'p') {
+      const isInInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.contentEditable === "true";
+
+      if (isInInput && event.key.toLowerCase() !== "p") {
         return;
       }
 
       const modifierKey = getModifierKey();
-      
+
       handleKeyboardShortcut(event, [
         {
-          key: 'k',
-          modifierKey: modifierKey as 'metaKey' | 'ctrlKey',
+          key: "k",
+          modifierKey: modifierKey as "metaKey" | "ctrlKey",
           handler: handleFocusSearch,
         },
         {
-          key: 'p',
-          modifierKey: modifierKey as 'metaKey' | 'ctrlKey',
+          key: "p",
+          modifierKey: modifierKey as "metaKey" | "ctrlKey",
           handler: handlePasteAndSearch,
         },
       ]);
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    
+    document.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -139,7 +147,11 @@ function App() {
         <Header onSettingsClick={() => setShowSettings(true)} />
 
         <div className="mt-8">
-          <SearchBar ref={searchBarRef} onSearch={handleSearch} isLoading={isLoading} />
+          <SearchBar
+            ref={searchBarRef}
+            onSearch={handleSearch}
+            isLoading={isLoading}
+          />
         </div>
 
         {currentWord && (
@@ -172,7 +184,6 @@ function App() {
             )}
           </div>
         )}
-
       </div>
 
       <SettingsModal

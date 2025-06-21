@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { AppSettings } from '@shared/types';
+import React, { useState, useEffect } from "react";
+import type { AppSettings } from "@shared/types";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -8,11 +8,11 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [settings, setSettings] = useState<AppSettings>({
-    preferredLanguage: 'en',
-    imageSearchProvider: 'auto',
+    preferredLanguage: "en",
+    imageSearchProvider: "auto",
     voiceSettings: {
-      provider: 'web',
-      language: 'en-US',
+      provider: "web",
+      language: "en-US",
     },
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -28,7 +28,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       const currentSettings = await window.electronAPI.getSettings();
       setSettings(currentSettings);
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error("Failed to load settings:", error);
     }
   };
 
@@ -38,21 +38,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       await window.electronAPI.saveSettings(settings);
       onClose();
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error("Failed to save settings:", error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const handleVoiceSettingChange = (field: string, value: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       voiceSettings: {
         ...prev.voiceSettings,
@@ -72,8 +72,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             className="text-dark-400 hover:text-white transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -89,8 +99,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="password"
-                  value={settings.googleApiKey || ''}
-                  onChange={(e) => handleInputChange('googleApiKey', e.target.value)}
+                  value={settings.googleApiKey || ""}
+                  onChange={(e) =>
+                    handleInputChange("googleApiKey", e.target.value)
+                  }
                   placeholder="Enter Google API key..."
                   className="input-field w-full"
                 />
@@ -102,8 +114,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="password"
-                  value={settings.openaiApiKey || ''}
-                  onChange={(e) => handleInputChange('openaiApiKey', e.target.value)}
+                  value={settings.openaiApiKey || ""}
+                  onChange={(e) =>
+                    handleInputChange("openaiApiKey", e.target.value)
+                  }
                   placeholder="Enter OpenAI API key..."
                   className="input-field w-full"
                 />
@@ -115,8 +129,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="text"
-                  value={settings.googleSearchEngineId || ''}
-                  onChange={(e) => handleInputChange('googleSearchEngineId', e.target.value)}
+                  value={settings.googleSearchEngineId || ""}
+                  onChange={(e) =>
+                    handleInputChange("googleSearchEngineId", e.target.value)
+                  }
                   placeholder="Enter Google Custom Search Engine ID..."
                   className="input-field w-full"
                 />
@@ -128,8 +144,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="password"
-                  value={settings.pixabayApiKey || ''}
-                  onChange={(e) => handleInputChange('pixabayApiKey', e.target.value)}
+                  value={settings.pixabayApiKey || ""}
+                  onChange={(e) =>
+                    handleInputChange("pixabayApiKey", e.target.value)
+                  }
                   placeholder="Enter Pixabay API key..."
                   className="input-field w-full"
                 />
@@ -146,7 +164,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </label>
               <select
                 value={settings.preferredLanguage}
-                onChange={(e) => handleInputChange('preferredLanguage', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("preferredLanguage", e.target.value)
+                }
                 className="input-field w-full"
               >
                 <option value="en">English</option>
@@ -164,19 +184,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Image Search Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">Image Search</h3>
+            <h3 className="text-lg font-medium text-white mb-4">
+              Image Search
+            </h3>
             <div>
               <label className="block text-sm font-medium text-dark-400 mb-2">
                 Image Search Provider
               </label>
               <select
                 value={settings.imageSearchProvider}
-                onChange={(e) => handleInputChange('imageSearchProvider', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("imageSearchProvider", e.target.value)
+                }
                 className="input-field w-full"
               >
                 <option value="auto">Auto (DuckDuckGo with fallbacks)</option>
-                <option value="duckduckgo">DuckDuckGo (Free, no API key)</option>
-                <option value="google">Google Custom Search (Requires API key)</option>
+                <option value="duckduckgo">
+                  DuckDuckGo (Free, no API key)
+                </option>
+                <option value="google">
+                  Google Custom Search (Requires API key)
+                </option>
                 <option value="pixabay">Pixabay (Free API with key)</option>
               </select>
             </div>
@@ -184,7 +212,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Voice Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">Voice Settings</h3>
+            <h3 className="text-lg font-medium text-white mb-4">
+              Voice Settings
+            </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-dark-400 mb-2">
@@ -192,7 +222,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <select
                   value={settings.voiceSettings.provider}
-                  onChange={(e) => handleVoiceSettingChange('provider', e.target.value)}
+                  onChange={(e) =>
+                    handleVoiceSettingChange("provider", e.target.value)
+                  }
                   className="input-field w-full"
                 >
                   <option value="web">Web Speech API (Free)</option>
@@ -206,7 +238,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </label>
                 <select
                   value={settings.voiceSettings.language}
-                  onChange={(e) => handleVoiceSettingChange('language', e.target.value)}
+                  onChange={(e) =>
+                    handleVoiceSettingChange("language", e.target.value)
+                  }
                   className="input-field w-full"
                 >
                   <option value="en-US">English (US)</option>
@@ -240,15 +274,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             className="btn-primary"
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save Settings'}
+            {isSaving ? "Saving..." : "Save Settings"}
           </button>
         </div>
 
         {/* Help Text */}
         <div className="mt-6 p-4 bg-surface-300 rounded-lg">
           <p className="text-sm text-dark-400">
-            <strong className="text-white">Note:</strong> API keys are stored locally and are only used to enhance functionality.
-            The app works with mock data when no keys are provided.
+            <strong className="text-white">Note:</strong> API keys are stored
+            locally and are only used to enhance functionality. The app works
+            with mock data when no keys are provided.
           </p>
         </div>
       </div>

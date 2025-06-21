@@ -1,27 +1,27 @@
 // Keyboard utilities for cross-platform shortcut handling
 
 export const isMac = () => {
-  return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 };
 
 export const getModifierKey = () => {
-  return isMac() ? 'metaKey' : 'ctrlKey';
+  return isMac() ? "metaKey" : "ctrlKey";
 };
 
 export const getModifierKeyName = () => {
-  return isMac() ? '⌘' : 'Ctrl';
+  return isMac() ? "⌘" : "Ctrl";
 };
 
 export interface KeyboardShortcut {
   key: string;
-  modifierKey: 'metaKey' | 'ctrlKey';
+  modifierKey: "metaKey" | "ctrlKey";
   handler: (event: KeyboardEvent) => void;
   preventDefault?: boolean;
 }
 
 export const handleKeyboardShortcut = (
   event: KeyboardEvent,
-  shortcuts: KeyboardShortcut[]
+  shortcuts: KeyboardShortcut[],
 ): boolean => {
   for (const shortcut of shortcuts) {
     if (

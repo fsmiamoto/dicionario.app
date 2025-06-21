@@ -32,9 +32,9 @@ export interface AppSettings {
   claudeApiKey?: string;
   pixabayApiKey?: string;
   preferredLanguage: string;
-  imageSearchProvider: 'duckduckgo' | 'google' | 'pixabay' | 'auto';
+  imageSearchProvider: "duckduckgo" | "google" | "pixabay" | "auto";
   voiceSettings: {
-    provider: 'google' | 'web';
+    provider: "google" | "web";
     language: string;
     voice?: string;
   };
@@ -49,5 +49,9 @@ export interface ElectronAPI {
   generateAudio: (text: string, language: string) => Promise<string>;
   getSettings: () => Promise<AppSettings>;
   saveSettings: (settings: AppSettings) => Promise<void>;
-  validateApiKeys: () => Promise<{ openai: boolean; google: boolean; pixabay: boolean }>;
+  validateApiKeys: () => Promise<{
+    openai: boolean;
+    google: boolean;
+    pixabay: boolean;
+  }>;
 }

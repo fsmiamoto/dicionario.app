@@ -6,10 +6,12 @@
   * {
     @apply border-gray-300;
   }
-  
+
   body {
     @apply bg-surface-100 text-white font-sans;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -17,15 +19,15 @@
   .btn-primary {
     @apply bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors;
   }
-  
+
   .btn-secondary {
     @apply bg-surface-200 hover:bg-surface-300 text-white px-4 py-2 rounded-lg font-medium transition-colors;
   }
-  
+
   .input-field {
     @apply bg-surface-200 border border-surface-300 rounded-lg px-4 py-3 text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
   }
-  
+
   .card {
     @apply bg-surface-200 rounded-lg p-4 border border-surface-300;
   }

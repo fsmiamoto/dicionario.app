@@ -1,8 +1,8 @@
-import initSqlJs, { Database } from 'sql.js';
-import { join } from 'path';
-import { app } from 'electron';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import type { SearchHistory, AppSettings } from '@shared/types';
+import initSqlJs, { Database } from "sql.js";
+import { join } from "path";
+import { app } from "electron";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import type { SearchHistory, AppSettings } from "@shared/types";
 
 export class DatabaseService {
   private db: Database | null = null;
@@ -20,28 +20,28 @@ export class DatabaseService {
 
   private async initDatabase(): Promise<void> {
     const SQL = await initSqlJs();
-    const dbPath = join(app.getPath('userData'), 'language-study.db');
-    
+    const dbPath = join(app.getPath("userData"), "language-study.db");
+
     let data: Buffer | undefined;
     if (existsSync(dbPath)) {
       data = readFileSync(dbPath);
     }
-    
+
     this.db = new SQL.Database(data);
     this.createTables();
   }
 
   private ensureDb(): Database {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new Error("Database not initialized");
     }
     return this.db;
   }
 
   private saveDatabase(): void {
     if (!this.db) return;
-    
-    const dbPath = join(app.getPath('userData'), 'language-study.db');
+
+    const dbPath = join(app.getPath("userData"), "language-study.db");
     const data = this.db.export();
     writeFileSync(dbPath, data);
   }
@@ -75,7 +75,7 @@ export class DatabaseService {
       ORDER BY last_searched DESC
       LIMIT 50
     `);
-    
+
     const results: SearchHistory[] = [];
     while (stmt.step()) {
       const row = stmt.getAsObject() as any;
@@ -88,17 +88,17 @@ export class DatabaseService {
       });
     }
     stmt.free();
-    
+
     return results;
   }
 
   async addSearch(word: string): Promise<void> {
     const db = this.ensureDb();
-    
+
     // Check if word exists
-    const checkStmt = db.prepare('SELECT id FROM searches WHERE word = ?');
+    const checkStmt = db.prepare("SELECT id FROM searches WHERE word = ?");
     checkStmt.bind([word]);
-    
+
     if (checkStmt.step()) {
       // Update existing
       const updateStmt = db.prepare(`
@@ -116,15 +116,15 @@ export class DatabaseService {
       insertStmt.run([word]);
       insertStmt.free();
     }
-    
+
     checkStmt.free();
     this.saveDatabase();
   }
 
   async getSettings(): Promise<AppSettings> {
     const db = this.ensureDb();
-    const stmt = db.prepare('SELECT key, value FROM settings');
-    
+    const stmt = db.prepare("SELECT key, value FROM settings");
+
     const rows: { key: string; value: string }[] = [];
     while (stmt.step()) {
       const row = stmt.getAsObject() as any;
@@ -134,9 +134,9 @@ export class DatabaseService {
       });
     }
     stmt.free();
-    
+
     const settings: Partial<AppSettings> = {};
-    rows.forEach(row => {
+    rows.forEach((row) => {
       try {
         (settings as any)[row.key] = JSON.parse(row.value);
       } catch {
@@ -145,11 +145,11 @@ export class DatabaseService {
     });
 
     return {
-      preferredLanguage: 'en',
-      imageSearchProvider: 'auto',
+      preferredLanguage: "en",
+      imageSearchProvider: "auto",
       voiceSettings: {
-        provider: 'web',
-        language: 'en-US',
+        provider: "web",
+        language: "en-US",
       },
       ...settings,
     } as AppSettings;
@@ -157,13 +157,15 @@ export class DatabaseService {
 
   async saveSettings(settings: AppSettings): Promise<void> {
     const db = this.ensureDb();
-    
+
     Object.entries(settings).forEach(([key, value]) => {
-      const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
+      const stmt = db.prepare(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
+      );
       stmt.run([key, JSON.stringify(value)]);
       stmt.free();
     });
-    
+
     this.saveDatabase();
   }
 
