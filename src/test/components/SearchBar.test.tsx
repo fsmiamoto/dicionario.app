@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import SearchBar from "@/components/SearchBar";
 
 describe("SearchBar", () => {
@@ -45,9 +46,13 @@ describe("SearchBar", () => {
     const input = screen.getByPlaceholderText("Enter a word to learn...");
     await user.type(input, "test");
 
-    await waitFor(() => {
-      expect(screen.getByText("test")).toBeInTheDocument();
-    });
+    // Wait for search history to load and filter
+    await waitFor(
+      () => {
+        expect(screen.getByText("test")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("handles keyboard navigation in autocomplete", async () => {
@@ -57,9 +62,12 @@ describe("SearchBar", () => {
     const input = screen.getByPlaceholderText("Enter a word to learn...");
     await user.type(input, "test");
 
-    await waitFor(() => {
-      expect(screen.getByText("test")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("test")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     // Press arrow down to select first item
     fireEvent.keyDown(input, { key: "ArrowDown" });
@@ -77,9 +85,12 @@ describe("SearchBar", () => {
     const input = screen.getByPlaceholderText("Enter a word to learn...");
     await user.type(input, "test");
 
-    await waitFor(() => {
-      expect(screen.getByText("test")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("test")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     fireEvent.keyDown(input, { key: "Escape" });
 

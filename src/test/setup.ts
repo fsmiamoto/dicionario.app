@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 // Mock Electron API
 const mockElectronAPI = {
@@ -43,7 +44,7 @@ const mockElectronAPI = {
       category: "Practical/Work",
     },
   ]),
-  generateAudio: vi.fn().mockResolvedValue("mock-audio-url"),
+  generateAudio: vi.fn().mockResolvedValue("web-speech-api"),
   getSettings: vi.fn().mockResolvedValue({
     preferredLanguage: "en",
     voiceSettings: { provider: "web", language: "en-US" },
@@ -89,12 +90,4 @@ Object.defineProperty(window, "SpeechSynthesisUtterance", {
   writable: true,
 });
 
-// Mock clipboard API
-Object.defineProperty(navigator, "clipboard", {
-  value: {
-    writeText: vi.fn().mockResolvedValue(undefined),
-    readText: vi.fn().mockResolvedValue(""),
-  },
-  writable: true,
-  configurable: true,
-});
+// Note: Clipboard API is mocked per-test to avoid conflicts

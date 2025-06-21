@@ -14,17 +14,18 @@ const mockStatement = {
   getAsObject: vi.fn().mockReturnValue({}),
   free: vi.fn(),
   bind: vi.fn(),
+  all: vi.fn(),
 };
 
 const mockSql = {
   Database: vi.fn(() => mockDb),
 };
 
-vi.mock("sql.js", () => {
-  return {
-    default: vi.fn().mockResolvedValue(mockSql),
-  };
-});
+vi.mock("sql.js", () => ({
+  default: vi.fn().mockResolvedValue({
+    Database: vi.fn(() => mockDb),
+  }),
+}));
 
 // Mock electron
 vi.mock("electron", () => ({
@@ -35,6 +36,11 @@ vi.mock("electron", () => ({
 
 // Mock fs
 vi.mock("fs", () => ({
+  default: {
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    existsSync: vi.fn().mockReturnValue(false),
+  },
   readFileSync: vi.fn(),
   writeFileSync: vi.fn(),
   existsSync: vi.fn().mockReturnValue(false),
@@ -45,10 +51,16 @@ import { DatabaseService } from "../../main/services/database";
 describe("DatabaseService", () => {
   let dbService: DatabaseService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Reset mock implementations
+    mockStatement.step.mockReturnValue(false);
+    mockStatement.getAsObject.mockReturnValue({});
+
     mockDb.prepare.mockReturnValue(mockStatement);
     dbService = new DatabaseService();
+    await dbService.initialize();
   });
 
   afterEach(() => {
@@ -85,7 +97,19 @@ describe("DatabaseService", () => {
         },
       ];
 
-      mockStatement.all.mockReturnValue(mockHistory);
+      // Mock the step() and getAsObject() behavior
+      let callCount = 0;
+      mockStatement.step.mockImplementation(() => {
+        return callCount++ < mockHistory.length;
+      });
+
+      mockStatement.getAsObject.mockImplementation(() => {
+        const index = callCount - 1;
+        if (index < mockHistory.length) {
+          return mockHistory[index];
+        }
+        return {};
+      });
 
       const result = await dbService.getSearchHistory();
 
@@ -96,7 +120,7 @@ describe("DatabaseService", () => {
     });
 
     it("limits results to 50 items", async () => {
-      mockStatement.all.mockReturnValue([]);
+      mockStatement.step.mockReturnValue(false);
 
       await dbService.getSearchHistory();
 
@@ -108,31 +132,38 @@ describe("DatabaseService", () => {
 
   describe("addSearch", () => {
     it("adds new search word", async () => {
+      // Mock checkStmt.step() to return false (word doesn't exist)
+      mockStatement.step.mockReturnValue(false);
+
       await dbService.addSearch("newword");
 
       expect(mockDb.prepare).toHaveBeenCalledWith(
         expect.stringContaining("INSERT INTO searches (word) VALUES (?)"),
       );
-      expect(mockStatement.run).toHaveBeenCalledWith("newword");
+      expect(mockStatement.run).toHaveBeenCalledWith(["newword"]);
     });
 
     it("updates existing search count", async () => {
+      // Mock checkStmt.step() to return true (word exists)
+      mockStatement.step.mockReturnValue(true);
+
       await dbService.addSearch("existingword");
 
       expect(mockDb.prepare).toHaveBeenCalledWith(
-        expect.stringContaining("ON CONFLICT(word) DO UPDATE SET"),
+        expect.stringContaining("UPDATE searches"),
       );
     });
   });
 
   describe("settings management", () => {
     it("returns default settings when none exist", async () => {
-      mockStatement.all.mockReturnValue([]);
+      mockStatement.step.mockReturnValue(false);
 
       const result = await dbService.getSettings();
 
       expect(result).toEqual({
         preferredLanguage: "en",
+        imageSearchProvider: "auto",
         voiceSettings: {
           provider: "web",
           language: "en-US",
@@ -146,7 +177,19 @@ describe("DatabaseService", () => {
         { key: "googleApiKey", value: '"test-key"' },
       ];
 
-      mockStatement.all.mockReturnValue(mockSettings);
+      // Mock the step() and getAsObject() behavior for settings
+      let callCount = 0;
+      mockStatement.step.mockImplementation(() => {
+        return callCount++ < mockSettings.length;
+      });
+
+      mockStatement.getAsObject.mockImplementation(() => {
+        const index = callCount - 1;
+        if (index < mockSettings.length) {
+          return mockSettings[index];
+        }
+        return {};
+      });
 
       const result = await dbService.getSettings();
 
@@ -167,14 +210,14 @@ describe("DatabaseService", () => {
       await dbService.saveSettings(settings);
 
       expect(mockStatement.run).toHaveBeenCalledTimes(3);
-      expect(mockStatement.run).toHaveBeenCalledWith(
+      expect(mockStatement.run).toHaveBeenCalledWith([
         "preferredLanguage",
         '"es"',
-      );
-      expect(mockStatement.run).toHaveBeenCalledWith(
+      ]);
+      expect(mockStatement.run).toHaveBeenCalledWith([
         "googleApiKey",
         '"test-key-123"',
-      );
+      ]);
     });
   });
 

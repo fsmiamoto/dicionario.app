@@ -142,7 +142,7 @@ Your task is to provide a comprehensive yet concise explanation of ${targetLangu
 
 Keep explanations:
 - Clear and accessible for intermediate ${targetLanguage} language learners
-- Around 2-4 sentences for simple words, up to a short paragraph for complex terms
+- Try to keep it up to a short paragraph (3-4 lines)
 - Educational but not overly academic
 - Focused on practical understanding within ${targetLanguage} context
 - Include cultural context specific to ${targetLanguage}-speaking countries when relevant
@@ -151,10 +151,10 @@ IMPORTANT: Focus specifically on the ${targetLanguage} meaning and usage. If thi
 
 Format your response as plain text, well-structured with natural paragraph breaks when needed.`;
 
-      const userPrompt = `Explain the ${targetLanguage} word or expression: "${word}"`;
+      const userPrompt = `Explain the word or expression: "${word}" in english`;
 
       const completion = await this.client.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-nano",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
