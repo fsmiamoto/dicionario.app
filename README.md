@@ -19,9 +19,11 @@ An AI-powered vocabulary learning companion built with Electron, React, and Type
 
 ### 🖼️ **Visual Context**
 - 3x2 image grid showing contextual photos for vocabulary words
+- **Pagination support** - Navigate through multiple pages of images
 - Multiple image search providers (Google, DuckDuckGo, Pixabay)
 - Click images to copy URLs for Anki cards
 - Intelligent fallback systems for reliable results
+- Previous/Next buttons with page indicators
 
 ### 💬 **Example Phrases**
 - AI-generated example sentences with translations
@@ -79,6 +81,8 @@ src/
 │       └── tts.ts      # Text-to-speech service
 ├── renderer/          # React frontend
 │   ├── components/    # UI components
+│   │   ├── Pagination.tsx  # Pagination controls
+│   │   └── VisualContext.tsx # Image display with pagination
 │   ├── App.tsx       # Main app component
 │   └── main.tsx      # React entry point
 └── shared/           # Shared types and utilities
@@ -89,6 +93,7 @@ src/
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run pack` - Create distributable packages
+- `npm run format` - Format code with Prettier
 - `npm test` - Run unit tests
 - `npm run test:ui` - Open test UI
 
@@ -143,6 +148,19 @@ interface AppSettings {
     voice?: string;
   };
 }
+
+interface PaginationOptions {
+  page: number;
+  perPage: number;
+}
+
+interface PaginatedImageResult {
+  images: ImageResult[];
+  currentPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
 ```
 
 ## Testing
@@ -162,10 +180,12 @@ npm run test:ui
 
 ### Test Coverage
 - Component rendering and interactions
+- **Pagination component** functionality and state management
 - Search functionality and autocomplete
 - Database operations
 - API service mocking
 - Keyboard navigation
+- Loading states and error handling
 
 ## Building for Production
 
@@ -196,7 +216,7 @@ Supports packaging for:
 ### Study Workflow
 1. **Search** for a new vocabulary word
 2. **Read** the AI-generated explanation for context and cultural understanding
-3. **Browse** the visual context images
+3. **Browse** the visual context images with pagination for more options
 4. **Study** generated example phrases with translations
 5. **Listen** to pronunciation audio
 6. **Copy** explanations and phrases for your Anki cards
@@ -205,6 +225,7 @@ Supports packaging for:
 ### Best Practices
 - Set your preferred language in settings for accurate explanations
 - Use descriptive search terms for better image results
+- **Navigate through multiple image pages** to find the most relevant visuals
 - Read explanations first to understand cultural context
 - Listen to phrases multiple times for pronunciation practice
 - Copy both explanations and phrases for comprehensive cards
