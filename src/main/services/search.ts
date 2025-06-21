@@ -32,7 +32,6 @@ export class SearchService {
     const pagination = options || { page: 1, perPage: 6 };
 
     try {
-
       // Determine which provider to use
       if (
         provider === "google" &&

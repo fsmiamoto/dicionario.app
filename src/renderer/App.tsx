@@ -20,6 +20,7 @@ function App() {
   >();
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isImagesLoading, setIsImagesLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const searchBarRef = useRef<SearchBarRef>(null);
 
@@ -27,6 +28,7 @@ function App() {
     if (!word.trim()) return;
 
     setIsLoading(true);
+    setIsImagesLoading(true);
     setCurrentWord(word);
     setExplanation(null); // Reset explanation
     setPaginatedImages(undefined); // Reset pagination
@@ -83,13 +85,14 @@ function App() {
       console.error("Search failed:", error);
     } finally {
       setIsLoading(false);
+      setIsImagesLoading(false);
     }
   };
 
   const handlePageChange = async (page: number) => {
-    if (!currentWord || isLoading) return;
+    if (!currentWord || isImagesLoading) return;
 
-    setIsLoading(true);
+    setIsImagesLoading(true);
 
     try {
       const imageResult = await window.electronAPI.searchImages(currentWord, {
@@ -109,7 +112,7 @@ function App() {
     } catch (error) {
       console.error("Page change failed:", error);
     } finally {
-      setIsLoading(false);
+      setIsImagesLoading(false);
     }
   };
 
@@ -218,7 +221,7 @@ function App() {
                 <VisualContext
                   images={searchResult.images}
                   word={currentWord}
-                  isLoading={isLoading}
+                  isLoading={isImagesLoading}
                   currentPage={paginatedImages.currentPage}
                   totalPages={paginatedImages.totalPages}
                   onPageChange={handlePageChange}
