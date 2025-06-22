@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface WordExplanationProps {
   word: string;
@@ -94,9 +96,58 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
             </div>
           ) : explanation ? (
             <div className="prose prose-invert max-w-none">
-              <div className="text-white leading-relaxed text-base whitespace-pre-wrap">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Customize markdown components to match dark theme
+                  h1: ({ children }) => (
+                    <h1 className="text-xl font-semibold text-white mb-3 mt-4 first:mt-0">
+                      {children}
+                    </h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="text-lg font-semibold text-white mb-2 mt-3 first:mt-0">
+                      {children}
+                    </h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-base font-semibold text-white mb-2 mt-3 first:mt-0">
+                      {children}
+                    </h3>
+                  ),
+                  p: ({ children }) => (
+                    <p className="text-white mb-3 last:mb-0">{children}</p>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="text-white mb-3 last:mb-0 pl-4">
+                      {children}
+                    </ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="text-white mb-3 last:mb-0 pl-4">
+                      {children}
+                    </ol>
+                  ),
+                  li: ({ children }) => (
+                    <li className="text-white mb-1 last:mb-0">{children}</li>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-blue-300">
+                      {children}
+                    </strong>
+                  ),
+                  em: ({ children }) => (
+                    <em className="italic text-gray-300">{children}</em>
+                  ),
+                  code: ({ children }) => (
+                    <code className="bg-surface-300 text-blue-300 px-1 py-0.5 rounded text-sm">
+                      {children}
+                    </code>
+                  ),
+                }}
+              >
                 {explanation}
-              </div>
+              </ReactMarkdown>
             </div>
           ) : (
             <div className="text-dark-400 italic text-sm">

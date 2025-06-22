@@ -3,7 +3,7 @@ import type { ExamplePhrase } from "@shared/types";
 
 export class OpenAIProvider {
   private client: OpenAI | null = null;
-  private MODEL = "gpt-4.1-nano";
+  private MODEL = "gpt-4.1-mini";
 
   private initializeClient(apiKey: string): void {
     if (!this.client || this.client.apiKey !== apiKey) {
@@ -131,28 +131,33 @@ Return ONLY valid JSON in this exact format:
 
       console.log("OpenAI client initialized successfully");
 
-      const systemPrompt = `You are a language learnng assistant specializing in clear, educational explanations for ${targetLanguage} language learners.
+      const systemPrompt = `You are a language learning assistant specializing in clear, educational explanations for ${targetLanguage} language learners.
 
 Your task is to provide a comprehensive yet concise explanation of ${targetLanguage} words, phrases, or expressions that helps language learners understand:
-1. The primary meaning and definition within ${targetLanguage}
+1. The primary and other meanings within ${targetLanguage}
 2. How and when it's commonly used in ${targetLanguage}-speaking contexts
-3. Cultural context, nuances, and regional variations specific to ${targetLanguage}
-4. Register level (formal, informal, slang, colloquial) within ${targetLanguage} culture
-5. Etymology or interesting background within the ${targetLanguage} language family
-6. Common collocations or phrases it appears in
+3. Register level (formal, informal, slang, colloquial) within ${targetLanguage} culture
+4. Common collocations or phrases it appears in
 
 Keep explanations:
 - Clear and accessible for intermediate ${targetLanguage} language learners
 - Try to keep it up to a short paragraph (3-4 lines)
 - Educational but not overly academic
+- Use bullet points to make it easier to read
 - Focused on practical understanding within ${targetLanguage} context
 - Include cultural context specific to ${targetLanguage}-speaking countries when relevant
 
 IMPORTANT: Focus specifically on the ${targetLanguage} meaning and usage. If this word exists in multiple languages, explain it within the ${targetLanguage} context only.
 
-Format your response as plain text, well-structured with natural paragraph breaks when needed.`;
+**FORMAT REQUIREMENTS:**
+- Use proper Markdown formatting
+- Use **bold** for emphasis on important terms
+- Use bullet points with - for lists
+- Use *italics* for register levels (formal, informal, etc.)
+- Don't include any headers
+- Keep the overall structure concise and scannable`;
 
-      const userPrompt = `Explain the word or expression: "${word}" in English`;
+      const userPrompt = `Explain in English the word or expression: "${word}"`;
 
       const completion = await this.client.chat.completions.create({
         model: this.MODEL,
