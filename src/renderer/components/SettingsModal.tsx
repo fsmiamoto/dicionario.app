@@ -110,7 +110,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
               <div>
                 <label className="block text-sm font-medium text-dark-400 mb-2">
-                  OpenAI API Key (for phrase generation)
+                  OpenAI API Key (for phrase generation & TTS)
                 </label>
                 <input
                   type="password"
@@ -228,6 +228,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                   className="input-field w-full"
                 >
                   <option value="web">Web Speech API (Free)</option>
+                  <option value="openai">OpenAI TTS (Requires API key)</option>
                   <option value="google">Google TTS (Requires API key)</option>
                 </select>
               </div>
@@ -256,6 +257,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                   <option value="zh-CN">Chinese (Simplified)</option>
                 </select>
               </div>
+
+              {/* OpenAI Voice Selection */}
+              {settings.voiceSettings.provider === "openai" && (
+                <div>
+                  <label className="block text-sm font-medium text-dark-400 mb-2">
+                    OpenAI Voice
+                  </label>
+                  <select
+                    value={settings.voiceSettings.voice || "alloy"}
+                    onChange={(e) =>
+                      handleVoiceSettingChange("voice", e.target.value)
+                    }
+                    className="input-field w-full"
+                  >
+                    <option value="alloy">Alloy</option>
+                    <option value="echo">Echo</option>
+                    <option value="fable">Fable</option>
+                    <option value="onyx">Onyx</option>
+                    <option value="nova">Nova</option>
+                    <option value="shimmer">Shimmer</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </div>

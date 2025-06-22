@@ -1,8 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type {
-  SearchHistory,
-  ExamplePhrase,
-  ImageResult,
   AppSettings,
   ElectronAPI,
   PaginationOptions,

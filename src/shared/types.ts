@@ -47,7 +47,7 @@ export interface AppSettings {
   preferredLanguage: string;
   imageSearchProvider: "duckduckgo" | "google" | "pixabay" | "auto";
   voiceSettings: {
-    provider: "google" | "web";
+    provider: "openai" | "google" | "web";
     language: string;
     voice?: string;
   };

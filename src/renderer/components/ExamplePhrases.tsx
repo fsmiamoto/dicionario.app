@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import type { ExamplePhrase } from "@shared/types";
+import React, { useState, useEffect } from "react";
+import type { ExamplePhrase, AppSettings } from "@shared/types";
 
 interface ExamplePhrasesProps {
   phrases: ExamplePhrase[];
@@ -12,6 +12,21 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
 }) => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
+  const [voiceLanguage, setVoiceLanguage] = useState<string>("en-US");
+
+  // Load voice settings on component mount
+  useEffect(() => {
+    const loadVoiceSettings = async () => {
+      try {
+        const settings: AppSettings = await window.electronAPI.getSettings();
+        setVoiceLanguage(settings.voiceSettings.language);
+      } catch (error) {
+        console.error("Failed to load voice settings:", error);
+      }
+    };
+
+    loadVoiceSettings();
+  }, []);
 
   const handleCopyPhrase = async (phrase: ExamplePhrase) => {
     try {
@@ -35,7 +50,10 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
       setPlayingAudio(text);
 
       // Get audio from backend service
-      const audioResult = await window.electronAPI.generateAudio(text, "en-US");
+      const audioResult = await window.electronAPI.generateAudio(
+        text,
+        voiceLanguage,
+      );
 
       if (audioResult === "web-speech-api") {
         // Use Web Speech API
@@ -43,7 +61,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
           window.speechSynthesis.cancel(); // Stop any existing speech
 
           const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = "en-US";
+          utterance.lang = voiceLanguage;
           utterance.rate = 0.8;
 
           utterance.onend = () => setPlayingAudio(null);
@@ -53,18 +71,26 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
         } else {
           throw new Error("Web Speech API not available");
         }
+      } else if (audioResult.startsWith("data:audio/")) {
+        // Play generated audio data URL (from OpenAI TTS or other providers)
+        const audio = new Audio(audioResult);
+
+        audio.onended = () => setPlayingAudio(null);
+        audio.onerror = (error) => {
+          console.error("Audio playback error:", error);
+          setPlayingAudio(null);
+        };
+
+        await audio.play();
       } else if (audioResult.startsWith("file://")) {
-        // Play generated audio file
+        // Legacy file URL support (shouldn't be used anymore)
+        console.warn("File URL format is deprecated, use data URL instead");
         const audio = new Audio(audioResult);
 
         audio.onended = () => setPlayingAudio(null);
         audio.onerror = () => setPlayingAudio(null);
 
         await audio.play();
-      } else if (audioResult.startsWith("data:audio/")) {
-        // Handle mock data or other audio formats
-        console.log("Using fallback audio:", audioResult);
-        setPlayingAudio(null);
       } else {
         throw new Error("Unexpected audio format");
       }
@@ -162,7 +188,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10v4a2 2 0 002 2h2a2 2 0 002-2v-4M9 10V9a2 2 0 012-2h2a2 2 0 012 2v1"
+                            d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M6 9v6h3l5-5v8l-5-5H6z"
                           />
                         </svg>
                       )}

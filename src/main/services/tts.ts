@@ -1,9 +1,12 @@
 import { GoogleTTSProvider } from "./providers/GoogleTTSProvider";
+import { OpenAITTSProvider } from "./providers/OpenAITTSProvider";
 
 export class TTSService {
+  private openaiTTS: OpenAITTSProvider;
   private googleTTS: GoogleTTSProvider;
 
   constructor() {
+    this.openaiTTS = new OpenAITTSProvider();
     this.googleTTS = new GoogleTTSProvider();
   }
 
@@ -13,15 +16,36 @@ export class TTSService {
     settings?: any,
   ): Promise<string> {
     try {
-      // Try Google TTS first if API key is available
+      // Try OpenAI TTS first if API key is available and selected
+      if (
+        settings?.openaiApiKey &&
+        settings?.voiceSettings?.provider === "openai"
+      ) {
+        try {
+          return await this.openaiTTS.generateAudio(
+            text,
+            language,
+            settings.openaiApiKey,
+            settings.voiceSettings?.voice,
+          );
+        } catch (error) {
+          console.warn(
+            "OpenAI TTS failed, falling back to next provider:",
+            error,
+          );
+        }
+      }
+
+      // Try Google TTS if API key is available
       if (
         settings?.googleApiKey &&
-        settings?.voiceSettings?.provider === "google"
+        (settings?.voiceSettings?.provider === "google" ||
+          settings?.voiceSettings?.provider === "openai")
       ) {
         try {
           return await this.googleTTS.generateAudio(
             text,
-            "ja-JP",
+            language,
             settings.googleApiKey,
             settings.voiceSettings?.voice,
           );
@@ -49,6 +73,13 @@ export class TTSService {
   ): Promise<string[]> {
     try {
       if (
+        settings?.openaiApiKey &&
+        settings?.voiceSettings?.provider === "openai"
+      ) {
+        return await this.openaiTTS.getAvailableVoices();
+      }
+
+      if (
         settings?.googleApiKey &&
         settings?.voiceSettings?.provider === "google"
       ) {
@@ -68,6 +99,7 @@ export class TTSService {
 
   cleanupOldFiles(): void {
     try {
+      this.openaiTTS.cleanupOldFiles();
       this.googleTTS.cleanupOldFiles();
     } catch (error) {
       console.error("Failed to cleanup old TTS files:", error);

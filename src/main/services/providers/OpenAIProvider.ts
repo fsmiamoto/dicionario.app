@@ -3,7 +3,7 @@ import type { ExamplePhrase } from "@shared/types";
 
 export class OpenAIProvider {
   private client: OpenAI | null = null;
-  private MODEL = "gpt-4.1-nano"
+  private MODEL = "gpt-4.1-nano";
 
   private initializeClient(apiKey: string): void {
     if (!this.client || this.client.apiKey !== apiKey) {
@@ -152,7 +152,7 @@ IMPORTANT: Focus specifically on the ${targetLanguage} meaning and usage. If thi
 
 Format your response as plain text, well-structured with natural paragraph breaks when needed.`;
 
-      const userPrompt = `Explain the word or expression: "${word}" in english`;
+      const userPrompt = `Explain the word or expression: "${word}" in English`;
 
       const completion = await this.client.chat.completions.create({
         model: this.MODEL,
