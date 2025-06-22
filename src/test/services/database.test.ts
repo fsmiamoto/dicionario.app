@@ -168,6 +168,13 @@ describe("DatabaseService", () => {
           provider: "web",
           language: "en-US",
         },
+        anki: {
+          enabled: false,
+          deckName: "Exemplar::Vocabulary",
+          cardTemplate: "basic",
+          includeAudio: true,
+          includeImages: true,
+        },
       });
     });
 

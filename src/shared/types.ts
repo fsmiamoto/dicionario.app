@@ -38,6 +38,22 @@ export interface SearchResult {
   phrases: ExamplePhrase[];
 }
 
+export interface AnkiCard {
+  word: string;
+  explanation: string;
+  phrase: ExamplePhrase;
+  image?: ImageResult;
+  audioUrl?: string;
+}
+
+export interface AnkiSettings {
+  enabled: boolean;
+  deckName: string;
+  cardTemplate: "basic" | "cloze";
+  includeAudio: boolean;
+  includeImages: boolean;
+}
+
 export interface AppSettings {
   googleApiKey?: string;
   googleSearchEngineId?: string;
@@ -51,6 +67,7 @@ export interface AppSettings {
     language: string;
     voice?: string;
   };
+  anki: AnkiSettings;
 }
 
 export interface ElectronAPI {
@@ -70,4 +87,12 @@ export interface ElectronAPI {
     google: boolean;
     pixabay: boolean;
   }>;
+  // Anki operations
+  ankiTestConnection: () => Promise<boolean>;
+  ankiGetDecks: () => Promise<string[]>;
+  ankiCreateCard: (card: AnkiCard, deckName?: string) => Promise<boolean>;
+  ankiCreateCards: (
+    cards: AnkiCard[],
+    deckName?: string,
+  ) => Promise<{ success: number; failed: number }>;
 }

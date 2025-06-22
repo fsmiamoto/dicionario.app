@@ -5,11 +5,16 @@ import WordExplanation from "./components/WordExplanation";
 import VisualContext from "./components/VisualContext";
 import ExamplePhrases from "./components/ExamplePhrases";
 import SettingsModal from "./components/SettingsModal";
+import AnkiCardCreator from "./components/AnkiCardCreator";
 import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
 import type {
   SearchResult,
   PaginatedImageResult,
   PaginationOptions,
+  ExamplePhrase,
+  ImageResult,
+  AnkiCard,
+  AppSettings,
 } from "@shared/types";
 
 function App() {
@@ -22,7 +27,51 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isImagesLoading, setIsImagesLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAnkiCardCreator, setShowAnkiCardCreator] = useState(false);
+  const [selectedPhrases, setSelectedPhrases] = useState<ExamplePhrase[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageResult[]>([]);
+  const [ankiMode, setAnkiMode] = useState(false);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
   const searchBarRef = useRef<SearchBarRef>(null);
+
+  // Load settings on component mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const appSettings = await window.electronAPI.getSettings();
+        setSettings(appSettings);
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const handleAnkiModeToggle = () => {
+    setAnkiMode(!ankiMode);
+    if (ankiMode) {
+      // Reset selections when exiting Anki mode
+      setSelectedPhrases([]);
+      setSelectedImages([]);
+    }
+  };
+
+  const handleCreateAnkiCards = () => {
+    if (selectedPhrases.length === 0) {
+      alert("Please select at least one phrase to create Anki cards.");
+      return;
+    }
+    setShowAnkiCardCreator(true);
+  };
+
+  const handleAnkiCardsCreated = (cards: AnkiCard[]) => {
+    console.log(`Successfully created ${cards.length} Anki cards`);
+    // Reset selections after successful creation
+    setSelectedPhrases([]);
+    setSelectedImages([]);
+    setAnkiMode(false);
+  };
 
   const handleSearch = async (word: string) => {
     if (!word.trim()) return;
@@ -32,6 +81,9 @@ function App() {
     setCurrentWord(word);
     setExplanation(null); // Reset explanation
     setPaginatedImages(undefined); // Reset pagination
+    setSelectedPhrases([]); // Reset Anki selections
+    setSelectedImages([]);
+    setAnkiMode(false);
 
     try {
       // Add to search history
@@ -204,9 +256,61 @@ function App() {
 
         {currentWord && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              "{currentWord}"
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">"{currentWord}"</h2>
+
+              {/* Anki Controls */}
+              {settings?.anki?.enabled && searchResult && (
+                <div className="flex items-center space-x-3">
+                  {ankiMode && (
+                    <button
+                      onClick={handleCreateAnkiCards}
+                      disabled={selectedPhrases.length === 0}
+                      className="px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-dark-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        />
+                      </svg>
+                      <span>Create Anki Cards ({selectedPhrases.length})</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleAnkiModeToggle}
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                      ankiMode
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "bg-surface-300 hover:bg-surface-400 text-white"
+                    }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                    <span>{ankiMode ? "Exit Anki Mode" : "Anki Mode"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Word Explanation Section */}
             <WordExplanation
@@ -225,11 +329,17 @@ function App() {
                   currentPage={paginatedImages.currentPage}
                   totalPages={paginatedImages.totalPages}
                   onPageChange={handlePageChange}
+                  selectedImages={selectedImages}
+                  onImageSelection={setSelectedImages}
+                  showAnkiControls={ankiMode}
                 />
 
                 <ExamplePhrases
                   phrases={searchResult.phrases}
                   isLoading={isLoading}
+                  selectedPhrases={selectedPhrases}
+                  onPhraseSelection={setSelectedPhrases}
+                  showAnkiControls={ankiMode}
                 />
               </div>
             )}
@@ -240,6 +350,16 @@ function App() {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+      />
+
+      <AnkiCardCreator
+        word={currentWord}
+        explanation={explanation}
+        selectedPhrases={selectedPhrases}
+        selectedImages={selectedImages}
+        isOpen={showAnkiCardCreator}
+        onClose={() => setShowAnkiCardCreator(false)}
+        onCreateCard={handleAnkiCardsCreated}
       />
     </div>
   );

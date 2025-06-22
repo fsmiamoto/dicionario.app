@@ -14,12 +14,23 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       provider: "web",
       language: "en-US",
     },
+    anki: {
+      enabled: false,
+      deckName: "Exemplar::Vocabulary",
+      cardTemplate: "basic",
+      includeAudio: true,
+      includeImages: true,
+    },
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [ankiConnected, setAnkiConnected] = useState<boolean>(false);
+  const [testingAnkiConnection, setTestingAnkiConnection] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
       loadSettings();
+      testAnkiConnection();
     }
   }, [isOpen]);
 
@@ -61,11 +72,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     }));
   };
 
+  const handleAnkiSettingChange = (field: string, value: string | boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      anki: {
+        ...prev.anki,
+        [field]: value,
+      },
+    }));
+  };
+
+  const testAnkiConnection = async () => {
+    setTestingAnkiConnection(true);
+    try {
+      const connected = await window.electronAPI.ankiTestConnection();
+      setAnkiConnected(connected);
+    } catch (error) {
+      console.error("Failed to test Anki connection:", error);
+      setAnkiConnected(false);
+    } finally {
+      setTestingAnkiConnection(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-surface-200 rounded-lg p-6 w-full max-w-md border border-surface-300">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface-200 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-surface-300">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">Settings</h2>
           <button
@@ -281,6 +315,200 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Anki Integration Settings */}
+          <div>
+            <h3 className="text-lg font-medium text-white mb-4 flex items-center space-x-2">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+              <span>Anki Integration</span>
+            </h3>
+
+            {/* Connection Status */}
+            <div
+              className={`p-3 rounded-lg mb-4 ${ankiConnected ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"}`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {ankiConnected ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  )}
+                  <span className="text-sm">
+                    {ankiConnected
+                      ? "Anki is connected and ready"
+                      : "Anki not connected. Please ensure Anki is running with AnkiConnect add-on."}
+                  </span>
+                </div>
+                <button
+                  onClick={testAnkiConnection}
+                  disabled={testingAnkiConnection}
+                  className="text-xs bg-surface-300 hover:bg-surface-400 text-white px-3 py-1 rounded transition-colors disabled:opacity-50"
+                >
+                  {testingAnkiConnection ? "Testing..." : "Test"}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Enable Anki Integration */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="anki-enabled"
+                  checked={settings.anki.enabled}
+                  onChange={(e) =>
+                    handleAnkiSettingChange("enabled", e.target.checked)
+                  }
+                  className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                />
+                <label
+                  htmlFor="anki-enabled"
+                  className="text-sm font-medium text-white"
+                >
+                  Enable Anki Integration
+                </label>
+              </div>
+
+              {settings.anki.enabled && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-400 mb-2">
+                      Deck Name
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.anki.deckName}
+                      onChange={(e) =>
+                        handleAnkiSettingChange("deckName", e.target.value)
+                      }
+                      placeholder="Exemplar::Vocabulary"
+                      className="input-field w-full"
+                    />
+                    <p className="text-xs text-dark-400 mt-1">
+                      Use :: to create nested decks (e.g.,
+                      "Language::Japanese::Vocabulary")
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-dark-400 mb-2">
+                      Card Template
+                    </label>
+                    <select
+                      value={settings.anki.cardTemplate}
+                      onChange={(e) =>
+                        handleAnkiSettingChange("cardTemplate", e.target.value)
+                      }
+                      className="input-field w-full"
+                    >
+                      <option value="basic">Basic (Front/Back)</option>
+                      <option value="cloze">Cloze Deletion</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="anki-include-audio"
+                        checked={settings.anki.includeAudio}
+                        onChange={(e) =>
+                          handleAnkiSettingChange(
+                            "includeAudio",
+                            e.target.checked,
+                          )
+                        }
+                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                      />
+                      <label
+                        htmlFor="anki-include-audio"
+                        className="text-sm font-medium text-white"
+                      >
+                        Include Audio in Cards
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="anki-include-images"
+                        checked={settings.anki.includeImages}
+                        onChange={(e) =>
+                          handleAnkiSettingChange(
+                            "includeImages",
+                            e.target.checked,
+                          )
+                        }
+                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                      />
+                      <label
+                        htmlFor="anki-include-images"
+                        className="text-sm font-medium text-white"
+                      >
+                        Include Images in Cards
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {!ankiConnected && (
+              <div className="mt-4 p-3 bg-surface-300 rounded-lg">
+                <p className="text-sm text-dark-400">
+                  <strong className="text-white">Setup Instructions:</strong>
+                  <br />
+                  1. Install Anki from{" "}
+                  <span className="text-primary-400">
+                    https://apps.ankiweb.net
+                  </span>
+                  <br />
+                  2. Install AnkiConnect add-on (code: 2055492159)
+                  <br />
+                  3. Restart Anki and keep it running
+                  <br />
+                  4. Click "Test" to verify the connection
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

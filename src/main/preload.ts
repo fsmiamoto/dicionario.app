@@ -3,6 +3,7 @@ import type {
   AppSettings,
   ElectronAPI,
   PaginationOptions,
+  AnkiCard,
 } from "@shared/types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -20,6 +21,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveSettings: (settings: AppSettings) =>
     ipcRenderer.invoke("save-settings", settings),
   validateApiKeys: () => ipcRenderer.invoke("validate-api-keys"),
+  // Anki operations
+  ankiTestConnection: () => ipcRenderer.invoke("anki-test-connection"),
+  ankiGetDecks: () => ipcRenderer.invoke("anki-get-decks"),
+  ankiCreateCard: (card: AnkiCard, deckName?: string) =>
+    ipcRenderer.invoke("anki-create-card", card, deckName),
+  ankiCreateCards: (cards: AnkiCard[], deckName?: string) =>
+    ipcRenderer.invoke("anki-create-cards", cards, deckName),
 } as ElectronAPI);
 
 declare global {

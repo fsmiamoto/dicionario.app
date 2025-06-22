@@ -3,6 +3,7 @@ import { join } from "path";
 import { DatabaseService } from "./services/database";
 import { SearchService } from "./services/search";
 import { TTSService } from "./services/tts";
+import { AnkiService } from "./services/anki";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -10,6 +11,7 @@ let mainWindow: BrowserWindow;
 let dbService: DatabaseService;
 let searchService: SearchService;
 let ttsService: TTSService;
+let ankiService: AnkiService;
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -50,6 +52,7 @@ app.whenReady().then(async () => {
     await dbService.initialize();
     searchService = new SearchService();
     ttsService = new TTSService();
+    ankiService = new AnkiService();
   } catch (error) {
     console.error("Failed to initialize services:", error);
   }
@@ -110,3 +113,23 @@ ipcMain.handle("generate-explanation", async (_, word: string) => {
   const settings = await dbService.getSettings();
   return searchService.generateExplanation(word, settings);
 });
+
+// Anki IPC Handlers
+ipcMain.handle("anki-test-connection", async () => {
+  return ankiService.testConnection();
+});
+
+ipcMain.handle("anki-get-decks", async () => {
+  return ankiService.getDeckNames();
+});
+
+ipcMain.handle("anki-create-card", async (_, card: any, deckName?: string) => {
+  return ankiService.addCard(card, deckName);
+});
+
+ipcMain.handle(
+  "anki-create-cards",
+  async (_, cards: any[], deckName?: string) => {
+    return ankiService.addCards(cards, deckName);
+  },
+);

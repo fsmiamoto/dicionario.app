@@ -4,28 +4,39 @@ import type { ExamplePhrase, AppSettings } from "@shared/types";
 interface ExamplePhrasesProps {
   phrases: ExamplePhrase[];
   isLoading: boolean;
+  selectedPhrases?: ExamplePhrase[];
+  onPhraseSelection?: (phrases: ExamplePhrase[]) => void;
+  showAnkiControls?: boolean;
 }
 
 const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
   phrases,
   isLoading,
+  selectedPhrases = [],
+  onPhraseSelection,
+  showAnkiControls = false,
 }) => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
   const [voiceLanguage, setVoiceLanguage] = useState<string>("en-US");
+  const [ankiEnabled, setAnkiEnabled] = useState<boolean>(false);
 
-  // Load voice settings on component mount
+  // Load voice settings and Anki settings on component mount
   useEffect(() => {
-    const loadVoiceSettings = async () => {
+    const loadSettings = async () => {
       try {
         const settings: AppSettings = await window.electronAPI.getSettings();
         setVoiceLanguage(settings.voiceSettings.language);
+        setAnkiEnabled(settings.anki?.enabled || false);
       } catch (error) {
-        console.error("Failed to load voice settings:", error);
+        console.error("Failed to load settings:", error);
       }
     };
 
-    loadVoiceSettings();
+    // Only load settings if electronAPI is available (not in tests)
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      loadSettings();
+    }
   }, []);
 
   const handleCopyPhrase = async (phrase: ExamplePhrase) => {
@@ -36,6 +47,31 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
     } catch (error) {
       console.error("Failed to copy phrase:", error);
     }
+  };
+
+  const handlePhraseToggle = (phrase: ExamplePhrase) => {
+    if (!onPhraseSelection) return;
+
+    const isSelected = selectedPhrases.some((p) => p.text === phrase.text);
+    if (isSelected) {
+      onPhraseSelection(selectedPhrases.filter((p) => p.text !== phrase.text));
+    } else {
+      onPhraseSelection([...selectedPhrases, phrase]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (!onPhraseSelection) return;
+    onPhraseSelection(phrases);
+  };
+
+  const handleDeselectAll = () => {
+    if (!onPhraseSelection) return;
+    onPhraseSelection([]);
+  };
+
+  const isPhraseSelected = (phrase: ExamplePhrase) => {
+    return selectedPhrases.some((p) => p.text === phrase.text);
   };
 
   const handlePlayAudio = async (text: string) => {
@@ -116,22 +152,47 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-        <span>Example Phrases</span>
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+          <span>Example Phrases</span>
+          {showAnkiControls && selectedPhrases.length > 0 && (
+            <span className="text-sm text-primary-400">
+              ({selectedPhrases.length} selected)
+            </span>
+          )}
+        </h3>
+
+        {showAnkiControls && ankiEnabled && phrases.length > 0 && (
+          <div className="flex items-center space-x-2 text-sm">
+            <button
+              onClick={handleSelectAll}
+              className="text-primary-400 hover:text-primary-300 transition-colors"
+            >
+              Select All
+            </button>
+            <span className="text-dark-400">|</span>
+            <button
+              onClick={handleDeselectAll}
+              className="text-primary-400 hover:text-primary-300 transition-colors"
+            >
+              Deselect All
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-3">
         {isLoading
@@ -145,16 +206,30 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
           : phrases.map((phrase, index) => (
               <div
                 key={index}
-                className="card group hover:bg-surface-300 transition-colors"
+                className={`card group hover:bg-surface-300 transition-colors ${
+                  showAnkiControls && isPhraseSelected(phrase)
+                    ? "ring-2 ring-primary-500"
+                    : ""
+                }`}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 space-y-2">
-                    <p className="text-white font-medium leading-relaxed">
-                      {phrase.text}
-                    </p>
-                    <p className="text-dark-400 italic text-sm">
-                      {phrase.translation}
-                    </p>
+                  <div className="flex items-start space-x-3 flex-1">
+                    {showAnkiControls && ankiEnabled && (
+                      <input
+                        type="checkbox"
+                        checked={isPhraseSelected(phrase)}
+                        onChange={() => handlePhraseToggle(phrase)}
+                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500 mt-1"
+                      />
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <p className="text-white font-medium leading-relaxed">
+                        {phrase.text}
+                      </p>
+                      <p className="text-dark-400 italic text-sm">
+                        {phrase.translation}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex items-center space-x-2 ml-4">
