@@ -1,0 +1,137 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  version-and-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Bump version and create tag
+        id: bump
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Bump patch version
+          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+          echo "New version: $NEW_VERSION"
+          
+          # Update package.json
+          npm version $NEW_VERSION --no-git-tag-version
+          
+          # Commit version change
+          git add package.json
+          git commit -m "chore: bump version to $NEW_VERSION"
+          
+          # Create and push tag
+          git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
+          git push origin main
+          git push origin "v$NEW_VERSION"
+          
+          # Set outputs
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "new_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+  build:
+    needs: version-and-tag
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version-and-tag.outputs.new_tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Build distributables
+        run: npm run pack
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List build artifacts
+        run: |
+          echo "Build artifacts:"
+          ls -la release/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: release/
+          retention-days: 30
+
+  release:
+    needs: [version-and-tag, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version-and-tag.outputs.new_tag }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Display structure of downloaded files
+        run: ls -la artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.version-and-tag.outputs.new_tag }}
+          name: Release ${{ needs.version-and-tag.outputs.new_tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+            artifacts/**/*.snap
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
