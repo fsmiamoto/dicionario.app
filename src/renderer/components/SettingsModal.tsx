@@ -171,21 +171,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                   className="input-field w-full"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
-                  Pixabay API Key (alternative image search)
-                </label>
-                <input
-                  type="password"
-                  value={settings.pixabayApiKey || ""}
-                  onChange={(e) =>
-                    handleInputChange("pixabayApiKey", e.target.value)
-                  }
-                  placeholder="Enter Pixabay API key..."
-                  className="input-field w-full"
-                />
-              </div>
             </div>
           </div>
 
@@ -232,14 +217,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 }
                 className="input-field w-full"
               >
-                <option value="auto">Auto (DuckDuckGo with fallbacks)</option>
-                <option value="duckduckgo">
-                  DuckDuckGo (Free, no API key)
-                </option>
+                <option value="auto">Auto (Google with mock fallback)</option>
                 <option value="google">
                   Google Custom Search (Requires API key)
                 </option>
-                <option value="pixabay">Pixabay (Free API with key)</option>
               </select>
             </div>
           </div>

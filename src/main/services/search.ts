@@ -6,21 +6,15 @@ import type {
   PaginatedImageResult,
 } from "@shared/types";
 import { OpenAIProvider } from "./providers/OpenAIProvider";
-import { DuckDuckGoImageProvider } from "./providers/DuckDuckGoImageProvider";
 import { GoogleImageProvider } from "./providers/GoogleImageProvider";
-import { PixabayImageProvider } from "./providers/PixabayImageProvider";
 
 export class SearchService {
   private openAI: OpenAIProvider;
-  private duckDuckGo: DuckDuckGoImageProvider;
   private googleImages: GoogleImageProvider;
-  private pixabay: PixabayImageProvider;
 
   constructor() {
     this.openAI = new OpenAIProvider();
-    this.duckDuckGo = new DuckDuckGoImageProvider();
     this.googleImages = new GoogleImageProvider();
-    this.pixabay = new PixabayImageProvider();
   }
 
   async searchImages(
@@ -32,12 +26,8 @@ export class SearchService {
     const pagination = options || { page: 1, perPage: 6 };
 
     try {
-      // Determine which provider to use
-      if (
-        provider === "google" &&
-        settings?.googleApiKey &&
-        settings?.googleSearchEngineId
-      ) {
+      // Try Google Custom Search if API key is available
+      if (settings?.googleApiKey && settings?.googleSearchEngineId) {
         try {
           console.log("Attempting Google Custom Search for:", word);
           const images = await this.googleImages.searchImages(
@@ -50,59 +40,14 @@ export class SearchService {
           return this.formatPaginatedResult(images, pagination);
         } catch (error) {
           console.warn(
-            "Google Images search failed, falling back to DuckDuckGo:",
+            "Google Images search failed, falling back to mock:",
             error instanceof Error ? error.message : error,
           );
         }
       }
 
-      if (provider === "pixabay" && settings?.pixabayApiKey) {
-        try {
-          const images = await this.pixabay.searchImages(
-            word,
-            settings.pixabayApiKey,
-            pagination,
-          );
-          return this.formatPaginatedResult(images, pagination);
-        } catch (error) {
-          console.warn(
-            "Pixabay search failed, falling back to DuckDuckGo:",
-            error,
-          );
-        }
-      }
-
-      if (provider === "duckduckgo" || provider === "auto") {
-        try {
-          const images = await this.duckDuckGo.searchImages(
-            word,
-            true,
-            pagination,
-          );
-          return this.formatPaginatedResult(images, pagination);
-        } catch (error) {
-          console.warn("DuckDuckGo search failed:", error);
-
-          // Try Google as fallback if available
-          if (settings?.googleApiKey && settings?.googleSearchEngineId) {
-            try {
-              const images = await this.googleImages.searchImages(
-                word,
-                settings.googleApiKey,
-                settings.googleSearchEngineId,
-                true,
-                pagination,
-              );
-              return this.formatPaginatedResult(images, pagination);
-            } catch (googleError) {
-              console.warn("Google Images fallback also failed:", googleError);
-            }
-          }
-        }
-      }
-
-      // Final fallback to mock data
-      console.log("All image search providers failed, using mock data");
+      // Fallback to mock data
+      console.log("No Google API key or search failed, using mock data");
       const mockImages = this.getMockImages(word, pagination);
       return this.formatPaginatedResult(mockImages, pagination);
     } catch (error) {
@@ -300,8 +245,8 @@ export class SearchService {
   // Utility method to validate API keys
   async validateApiKeys(
     settings: AppSettings,
-  ): Promise<{ openai: boolean; google: boolean; pixabay: boolean }> {
-    const results = { openai: false, google: false, pixabay: false };
+  ): Promise<{ openai: boolean; google: boolean }> {
+    const results = { openai: false, google: false };
 
     try {
       if (settings.openaiApiKey) {
@@ -314,12 +259,6 @@ export class SearchService {
         results.google = await this.googleImages.validateCredentials(
           settings.googleApiKey,
           settings.googleSearchEngineId,
-        );
-      }
-
-      if (settings.pixabayApiKey) {
-        results.pixabay = await this.pixabay.validateApiKey(
-          settings.pixabayApiKey,
         );
       }
     } catch (error) {

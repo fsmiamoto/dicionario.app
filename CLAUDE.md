@@ -79,8 +79,6 @@ The app supports multiple API providers configurable through settings:
 - OpenAI API for explanations and phrase generation
 - Google Custom Search API for high-quality images
 - Google Cloud TTS for premium audio
-- Pixabay API for free images
-- DuckDuckGo Images as fallback
 
 ## Testing Strategy
 - Unit tests for all components and services

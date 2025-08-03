@@ -59,9 +59,8 @@ export interface AppSettings {
   googleSearchEngineId?: string;
   openaiApiKey?: string;
   claudeApiKey?: string;
-  pixabayApiKey?: string;
   preferredLanguage: string;
-  imageSearchProvider: "duckduckgo" | "google" | "pixabay" | "auto";
+  imageSearchProvider: "google" | "auto";
   voiceSettings: {
     provider: "openai" | "google" | "web";
     language: string;
@@ -85,7 +84,6 @@ export interface ElectronAPI {
   validateApiKeys: () => Promise<{
     openai: boolean;
     google: boolean;
-    pixabay: boolean;
   }>;
   // Anki operations
   ankiTestConnection: () => Promise<boolean>;

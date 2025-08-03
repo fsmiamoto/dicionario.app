@@ -22,9 +22,8 @@ Dicionario accelerates language acquisition by providing visual context, intelli
 ### 🖼️ **Visual Context**
 - 3x2 image grid showing contextual photos for vocabulary words
 - **Pagination support** - Navigate through multiple pages of images
-- Multiple image search providers (Google, DuckDuckGo, Pixabay)
+- Google Custom Search API integration with mock fallback
 - Click images to copy URLs for Anki cards
-- Intelligent fallback systems for reliable results
 - Previous/Next buttons with page indicators
 
 ### 💬 **Example Phrases**
@@ -112,9 +111,7 @@ The app supports multiple APIs for enhanced functionality:
 
 ### Image Search
 - **Google Custom Search API** (premium, high quality)
-- **DuckDuckGo Images** (free, good coverage)
-- **Pixabay API** (free with API key)
-- Mock data for development
+- Mock data for development and fallback
 
 ### Language Models
 - **OpenAI GPT-4o-mini** for explanations and phrase generation
@@ -135,9 +132,8 @@ interface AppSettings {
   googleApiKey?: string;
   googleSearchEngineId?: string;
   openaiApiKey?: string;
-  pixabayApiKey?: string;
   preferredLanguage: string;
-  imageSearchProvider: 'duckduckgo' | 'google' | 'pixabay' | 'auto';
+  imageSearchProvider: 'google' | 'auto';
   voiceSettings: {
     provider: 'google' | 'web';
     language: string;
