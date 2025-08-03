@@ -34,7 +34,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
     };
 
     // Only load settings if electronAPI is available (not in tests)
-    if (typeof window !== 'undefined' && window.electronAPI) {
+    if (typeof window !== "undefined" && window.electronAPI) {
       loadSettings();
     }
   }, []);

@@ -2,7 +2,7 @@ import type { ImageResult, PaginationOptions } from "@shared/types";
 
 export class DuckDuckGoImageProvider {
   private readonly baseUrl = "https://api.duckduckgo.com/";
-  private readonly userAgent = "exemplar/1.0.0";
+  private readonly userAgent = "dicionario/1.0.0";
 
   private async makeRequest(url: string, options: any = {}): Promise<any> {
     // Try to use built-in fetch (Node.js 18+)
@@ -61,7 +61,7 @@ export class DuckDuckGoImageProvider {
       const searchUrl = new URL(this.baseUrl);
       searchUrl.searchParams.set("q", query);
       searchUrl.searchParams.set("format", "json");
-      searchUrl.searchParams.set("t", "exemplar");
+      searchUrl.searchParams.set("t", "dicionario");
       searchUrl.searchParams.set("no_html", "1");
       searchUrl.searchParams.set("skip_disambig", "1");
 

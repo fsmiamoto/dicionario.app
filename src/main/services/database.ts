@@ -153,7 +153,7 @@ export class DatabaseService {
       },
       anki: {
         enabled: false,
-        deckName: "Exemplar::Vocabulary",
+        deckName: "Dicionario::Vocabulary",
         cardTemplate: "basic",
         includeAudio: true,
         includeImages: true,

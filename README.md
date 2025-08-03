@@ -1,12 +1,10 @@
-# Exemplar
+# Dicionario
 
-> This project is an experiment of the "vibe coding" trend using Claude Code to solve a problem that I have.
->
-> Most of the LLM generated code has not been altered on purpose as part of a more long term experiment.
+An AI-powered vocabulary learning companion built with Electron, React, and TypeScript. 
 
-An AI-powered vocabulary learning companion built with Electron, React, and TypeScript. Exemplar accelerates language acquisition by providing visual context, intelligent explanations, and example phrases with audio pronunciation for vocabulary words.
+Dicionario accelerates language acquisition by providing visual context, intelligent explanations, and example phrases with audio pronunciation for vocabulary words.
 
-![Exemplar Screenshot](docs/screenshot.png)
+![Dicionario Screenshot](docs/screenshot.png)
 
 ## Features
 
@@ -41,12 +39,6 @@ An AI-powered vocabulary learning companion built with Electron, React, and Type
 - Play/pause controls for each phrase
 - Multiple language and voice support
 
-### 🎨 **Modern UI**
-- Dark theme optimized for extended study sessions
-- Responsive design with smooth animations
-- Keyboard shortcuts for efficient navigation
-- Clean, distraction-free interface
-
 ## Installation
 
 ### Prerequisites
@@ -58,7 +50,7 @@ An AI-powered vocabulary learning companion built with Electron, React, and Type
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd exemplar
+   cd dicionario
    ```
 
 2. Install dependencies:

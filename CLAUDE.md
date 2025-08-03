@@ -1,14 +1,23 @@
-# Claude AI Assistant Instructions for Exemplar
+# Claude AI Assistant Instructions for Dicionario
 
 ## Project Overview
-Exemplar is an AI-powered vocabulary learning companion built with Electron, React, and TypeScript. It provides visual context, intelligent explanations, and example phrases with audio pronunciation for vocabulary words.
+Dicionario is an AI-powered vocabulary learning companion built with Electron, React, and TypeScript.
+
+It provides visual context, intelligent explanations, and example phrases with audio pronunciation for vocabulary words.
 
 ## Required Workflow
 1. **Always build a plan first** - Use the TodoWrite tool to create a detailed plan before starting any coding work
+  - The plan should include low-level details of the actual changes in the code.
 2. **Confirm plan with user** - Present the plan and wait for user approval before proceeding
 3. **Execute the plan** - Implement changes step by step, updating todo status as you progress
 4. **Quality check** - After finishing, ask the user if the changes look good
 5. **Commit changes** - Only commit after user approval
+
+## Code Guidance
+- DON'T add comments unless explicitely asked too
+    - The code should speak for itself
+- When creating a new component, check how the current components are written and follow the same conventions.
+- Include Unit Tests for all new code introduced.
 
 ## Project Structure
 ```

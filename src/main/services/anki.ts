@@ -67,7 +67,7 @@ export class AnkiService {
 
   async addCard(
     card: AnkiCard,
-    deckName: string = "Exemplar::Vocabulary",
+    deckName: string = "Dicionario::Vocabulary",
   ): Promise<boolean> {
     try {
       // Ensure the deck exists
@@ -92,7 +92,7 @@ export class AnkiService {
               Front: cardData.front,
               Back: cardData.back,
             },
-            tags: ["exemplar", "vocabulary", card.word.toLowerCase()],
+            tags: ["dicionario", "vocabulary", card.word.toLowerCase()],
           },
         },
       });
@@ -115,7 +115,7 @@ export class AnkiService {
 
   async addCards(
     cards: AnkiCard[],
-    deckName: string = "Exemplar::Vocabulary",
+    deckName: string = "Dicionario::Vocabulary",
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
     let failed = 0;

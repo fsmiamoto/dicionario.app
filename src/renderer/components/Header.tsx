@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ onSettingsClick }) => {
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Exemplar</h1>
+          <h1 className="text-xl font-bold text-white">Dicionario</h1>
           <p className="text-sm text-dark-400">Helping you learn languages</p>
         </div>
       </div>

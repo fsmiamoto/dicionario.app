@@ -16,7 +16,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     },
     anki: {
       enabled: false,
-      deckName: "Exemplar::Vocabulary",
+      deckName: "Dicionario::Vocabulary",
       cardTemplate: "basic",
       includeAudio: true,
       includeImages: true,
@@ -419,7 +419,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                       onChange={(e) =>
                         handleAnkiSettingChange("deckName", e.target.value)
                       }
-                      placeholder="Exemplar::Vocabulary"
+                      placeholder="Dicionario::Vocabulary"
                       className="input-field w-full"
                     />
                     <p className="text-xs text-dark-400 mt-1">

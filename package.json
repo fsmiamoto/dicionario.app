@@ -1,5 +1,5 @@
 {
-  "name": "exemplar",
+  "name": "dicionario",
   "version": "0.0.1",
   "description": "AI-powered vocabulary learning companion with visual context and explanations",
   "main": "dist/main/main.js",
@@ -21,7 +21,7 @@
   "keywords": [
     "language-learning",
     "vocabulary",
-    "exemplar",
+    "dicionario",
     "ai-education",
     "electron",
     "education"
@@ -66,8 +66,8 @@
     "sql.js": "^1.8.0"
   },
   "build": {
-    "appId": "com.exemplar.app",
-    "productName": "Exemplar",
+    "appId": "com.dicionario.app",
+    "productName": "Dicionario",
     "directories": {
       "output": "release"
     },

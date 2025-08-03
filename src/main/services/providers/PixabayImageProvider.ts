@@ -79,7 +79,7 @@ export class PixabayImageProvider {
         method: "GET",
         headers: {
           Accept: "application/json",
-          "User-Agent": "exemplar/1.0.0",
+          "User-Agent": "dicionario/1.0.0",
         },
       });
 
