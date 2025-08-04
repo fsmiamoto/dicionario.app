@@ -37,7 +37,7 @@ jobs:
       - name: List build artifacts
         run: |
           echo "Build artifacts:"
-          ls -la release/
+          dir release/ 2>nul || ls -la release/ 2>/dev/null || echo "No release directory found"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -62,7 +62,7 @@ jobs:
           path: artifacts/
 
       - name: Display structure of downloaded files
-        run: ls -la artifacts/
+        run: dir artifacts/ 2>nul || ls -la artifacts/ 2>/dev/null || echo "No artifacts directory found"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
