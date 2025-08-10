@@ -182,8 +182,6 @@ export class AnkiService {
     filename: string,
   ): Promise<void> {
     try {
-      // Note: This is a simplified implementation
-      // In a real implementation, you'd need to handle audio file conversion and storage
       await this.sendRequest({
         action: "storeMediaFile",
         version: this.API_VERSION,

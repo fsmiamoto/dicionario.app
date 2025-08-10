@@ -1,9 +1,15 @@
 import OpenAI from "openai";
 import type { ExamplePhrase } from "@shared/types";
+import { PromptsManager } from "../PromptsManager";
 
 export class OpenAIProvider {
   private client: OpenAI | null = null;
   private MODEL = "gpt-4.1-mini";
+  private promptsManager: PromptsManager;
+
+  constructor(promptsManager?: PromptsManager) {
+    this.promptsManager = promptsManager || PromptsManager.getInstance();
+  }
 
   private initializeClient(apiKey: string): void {
     if (!this.client || this.client.apiKey !== apiKey) {
@@ -29,29 +35,11 @@ export class OpenAIProvider {
         throw new Error("Failed to initialize OpenAI client");
       }
 
-      const systemPrompt = `You are a language learning assistant. Generate 5 diverse example sentences for vocabulary learning.
-
-Rules:
-1. Create sentences that use the given word or expression naturally
-2. Vary the context: descriptive, practical, emotional, questioning, educational
-3. Make sentences appropriate for language learners, don't use rare words in the rest of the phrase.
-4. Provide translations in English
-5. Assign one category per sentence from: Descriptive/Aesthetic, Practical/Work, Question/Amazement, Memory/Emotion, Learning/Question
-6. The sentence should be generated in ${targetLanguage}
-common one.
-
-Return ONLY valid JSON in this exact format:
-{
-  "phrases": [
-    {
-      "text": "Sentence",
-      "translation": "Translation in English",
-      "category": "One of the 5 categories"
-    }
-  ]
-}`;
-
-      const userPrompt = `Generate 5 example sentences for the word: "${word}"`;
+      const { systemPrompt, userPrompt } =
+        this.promptsManager.getRenderedPrompt("phrase-generation", {
+          word,
+          targetLanguage,
+        });
 
       const completion = await this.client.chat.completions.create({
         model: this.MODEL,
@@ -131,33 +119,11 @@ Return ONLY valid JSON in this exact format:
 
       console.log("OpenAI client initialized successfully");
 
-      const systemPrompt = `You are a language learning assistant specializing in clear, educational explanations for ${targetLanguage} language learners.
-
-Your task is to provide a comprehensive yet concise explanation of ${targetLanguage} words, phrases, or expressions that helps language learners understand:
-1. The primary and other meanings within ${targetLanguage}
-2. How and when it's commonly used in ${targetLanguage}-speaking contexts
-3. Register level (formal, informal, slang, colloquial) within ${targetLanguage} culture
-4. Common collocations or phrases it appears in
-
-Keep explanations:
-- Clear and accessible for intermediate ${targetLanguage} language learners
-- Try to keep it up to a short paragraph (3-4 lines)
-- Educational but not overly academic
-- Use bullet points to make it easier to read
-- Focused on practical understanding within ${targetLanguage} context
-- Include cultural context specific to ${targetLanguage}-speaking countries when relevant
-
-IMPORTANT: Focus specifically on the ${targetLanguage} meaning and usage. If this word exists in multiple languages, explain it within the ${targetLanguage} context only.
-
-**FORMAT REQUIREMENTS:**
-- Use proper Markdown formatting
-- Use **bold** for emphasis on important terms
-- Use bullet points with - for lists
-- Use *italics* for register levels (formal, informal, etc.)
-- Don't include any headers
-- Keep the overall structure concise and scannable`;
-
-      const userPrompt = `Explain in English the word or expression: "${word}"`;
+      const { systemPrompt, userPrompt } =
+        this.promptsManager.getRenderedPrompt("explanation-generation", {
+          word,
+          targetLanguage,
+        });
 
       const completion = await this.client.chat.completions.create({
         model: this.MODEL,
