@@ -14,7 +14,7 @@ Dicionario accelerates language acquisition by providing visual context, intelli
 ### 💬 **Example Phrases**
 ### 🔊 **Audio Pronunciation**
 
-> Dicionario currently can be used with the bring-your-token models for OpenAI and Google Search API
+> Currently, Dicionario can only be used with the bring-your-token model for OpenAI and Google Search API
 
 ## Contributing
 
