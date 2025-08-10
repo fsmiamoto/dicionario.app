@@ -22,9 +22,7 @@ describe("PromptsManager", () => {
       const prompt = promptsManager.getPromptTemplate("phrase-generation");
       expect(prompt).toBeDefined();
       expect(prompt.system).toContain("language learning assistant");
-      expect(prompt.user).toContain(
-        "Generate 5 example sentences",
-      );
+      expect(prompt.user).toContain("Generate 5 example sentences");
     });
 
     it("should load explanation-generation prompt", () => {

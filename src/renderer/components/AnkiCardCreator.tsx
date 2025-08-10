@@ -263,7 +263,9 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                   onChange={(e) => setIncludeAudio(e.target.checked)}
                   className="w-4 h-4 text-primary-500 bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                 />
-                <span className="text-gray-900 dark:text-white text-sm">Include Audio</span>
+                <span className="text-gray-900 dark:text-white text-sm">
+                  Include Audio
+                </span>
               </label>
               <label className="flex items-center space-x-2">
                 <input
@@ -272,7 +274,9 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                   onChange={(e) => setIncludeImages(e.target.checked)}
                   className="w-4 h-4 text-primary-500 bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                 />
-                <span className="text-gray-900 dark:text-white text-sm">Include Images</span>
+                <span className="text-gray-900 dark:text-white text-sm">
+                  Include Images
+                </span>
               </label>
             </div>
           </div>
@@ -299,7 +303,10 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
             </h3>
             <div className="space-y-4 max-h-64 overflow-y-auto">
               {previewCards.map((card, index) => (
-                <div key={index} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <div
+                  key={index}
+                  className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Front */}
                     <div>

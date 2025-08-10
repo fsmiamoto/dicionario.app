@@ -95,7 +95,7 @@ function App() {
 
   const handleSearchFromHistory = (word: string) => {
     // Navigate to search page first
-    setCurrentPage('search');
+    setCurrentPage("search");
     // Then perform the search
     handleSearch(word);
   };
@@ -438,7 +438,9 @@ function App() {
           {currentPage === "history" && (
             <div className="mt-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Search History</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Search History
+                </h2>
                 <button
                   onClick={handleNavigateToSearch}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors flex items-center space-x-2"
