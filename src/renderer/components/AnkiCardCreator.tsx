@@ -152,10 +152,10 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface-200 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-surface-300">
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -173,7 +173,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-dark-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-white transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -237,13 +237,13 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
           {/* Settings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 Deck Name
               </label>
               <select
                 value={deckName}
                 onChange={(e) => setDeckName(e.target.value)}
-                className="w-full bg-surface-300 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                className="w-full bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:outline-none border border-gray-200 dark:border-gray-600"
                 disabled={!ankiConnected}
               >
                 {availableDecks.map((deck) => (
@@ -261,31 +261,31 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                   type="checkbox"
                   checked={includeAudio}
                   onChange={(e) => setIncludeAudio(e.target.checked)}
-                  className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-500 bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                 />
-                <span className="text-white text-sm">Include Audio</span>
+                <span className="text-gray-900 dark:text-white text-sm">Include Audio</span>
               </label>
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={includeImages}
                   onChange={(e) => setIncludeImages(e.target.checked)}
-                  className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-500 bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                 />
-                <span className="text-white text-sm">Include Images</span>
+                <span className="text-gray-900 dark:text-white text-sm">Include Images</span>
               </label>
             </div>
           </div>
 
           {/* Additional Notes */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
               Additional Notes (Optional)
             </label>
             <textarea
               value={additionalNotes}
               onChange={(e) => setAdditionalNotes(e.target.value)}
-              className="w-full bg-surface-300 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              className="w-full bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:outline-none border border-gray-200 dark:border-gray-600"
               rows={3}
               placeholder="Add any additional notes or context..."
             />
@@ -293,13 +293,13 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
 
           {/* Preview */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Preview ({previewCards.length} card
               {previewCards.length !== 1 ? "s" : ""})
             </h3>
             <div className="space-y-4 max-h-64 overflow-y-auto">
               {previewCards.map((card, index) => (
-                <div key={index} className="bg-surface-300 rounded-lg p-4">
+                <div key={index} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Front */}
                     <div>
@@ -314,7 +314,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                             className="w-20 h-20 object-cover rounded mx-auto mb-2"
                           />
                         )}
-                        <div className="text-lg font-bold text-white">
+                        <div className="text-lg font-bold text-gray-900 dark:text-white">
                           {card.word}
                         </div>
                       </div>
@@ -325,7 +325,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                       <h4 className="text-sm font-medium text-primary-400 mb-2">
                         Back
                       </h4>
-                      <div className="text-sm text-white space-y-2">
+                      <div className="text-sm text-gray-900 dark:text-white space-y-2">
                         {card.explanation && (
                           <div>
                             <strong>Explanation:</strong> {card.explanation}
@@ -334,7 +334,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
                         <div>
                           <strong>Example:</strong> {card.phrase.text}
                         </div>
-                        <div className="text-dark-400 italic">
+                        <div className="text-gray-500 dark:text-gray-400 italic">
                           {card.phrase.translation}
                         </div>
                         <div className="inline-block bg-primary-500/20 text-primary-300 px-2 py-1 rounded text-xs">
@@ -352,7 +352,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
           <div className="flex items-center justify-end space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-dark-400 hover:text-white transition-colors"
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
               Cancel
             </button>
@@ -361,7 +361,7 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
               disabled={
                 !ankiConnected || isCreating || selectedPhrases.length === 0
               }
-              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-dark-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
             >
               {isCreating && (
                 <svg
