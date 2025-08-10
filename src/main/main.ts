@@ -73,12 +73,23 @@ app.on("window-all-closed", () => {
 });
 
 // IPC Handlers
-ipcMain.handle("search-history", async () => {
-  return dbService.getSearchHistory();
+ipcMain.handle("search-history", async (_, favoritesOnly?: boolean) => {
+  return dbService.getSearchHistory(favoritesOnly);
 });
 
 ipcMain.handle("add-search", async (_, word: string) => {
   return dbService.addSearch(word);
+});
+
+ipcMain.handle(
+  "toggle-favorite",
+  async (_, word: string, isFavorite: boolean) => {
+    return dbService.toggleFavorite(word, isFavorite);
+  },
+);
+
+ipcMain.handle("is-favorite", async (_, word: string) => {
+  return dbService.isFavorite(word);
 });
 
 ipcMain.handle("search-images", async (_, word: string, options?: any) => {

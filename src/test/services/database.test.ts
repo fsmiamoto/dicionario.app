@@ -87,6 +87,8 @@ describe("DatabaseService", () => {
           searchCount: 3,
           lastSearched: "2024-01-01",
           createdAt: "2024-01-01",
+          isFavorite: 0,
+          favoritedAt: null,
         },
         {
           id: 2,
@@ -94,6 +96,8 @@ describe("DatabaseService", () => {
           searchCount: 1,
           lastSearched: "2024-01-02",
           createdAt: "2024-01-02",
+          isFavorite: 0,
+          favoritedAt: null,
         },
       ];
 
@@ -116,7 +120,26 @@ describe("DatabaseService", () => {
       expect(mockDb.prepare).toHaveBeenCalledWith(
         expect.stringContaining("ORDER BY last_searched DESC"),
       );
-      expect(result).toEqual(mockHistory);
+      expect(result).toEqual([
+        {
+          id: 1,
+          word: "test",
+          searchCount: 3,
+          lastSearched: "2024-01-01",
+          createdAt: "2024-01-01",
+          isFavorite: false, // Converted from 0 to false
+          favoritedAt: undefined, // null becomes undefined
+        },
+        {
+          id: 2,
+          word: "example",
+          searchCount: 1,
+          lastSearched: "2024-01-02",
+          createdAt: "2024-01-02",
+          isFavorite: false, // Converted from 0 to false
+          favoritedAt: undefined, // null becomes undefined
+        },
+      ]);
     });
 
     it("limits results to 50 items", async () => {
@@ -225,6 +248,165 @@ describe("DatabaseService", () => {
         "googleApiKey",
         '"test-key-123"',
       ]);
+    });
+  });
+
+  describe("favorites functionality", () => {
+    describe("toggleFavorite", () => {
+      it("adds word to favorites when it doesn't exist", async () => {
+        // Mock checkStmt.step() to return false (word doesn't exist)
+        mockStatement.step.mockReturnValue(false);
+
+        await dbService.toggleFavorite("newword", true);
+
+        expect(mockDb.prepare).toHaveBeenCalledWith(
+          expect.stringContaining(
+            "INSERT INTO searches (word, is_favorite, favorited_at) VALUES (?, ?, ?)",
+          ),
+        );
+        expect(mockStatement.run).toHaveBeenCalledWith([
+          "newword",
+          1, // boolean true converted to integer
+          expect.any(String), // favorited_at timestamp
+        ]);
+      });
+
+      it("updates existing word to favorite", async () => {
+        // Mock checkStmt.step() to return true (word exists)
+        mockStatement.step.mockReturnValue(true);
+
+        await dbService.toggleFavorite("existingword", true);
+
+        expect(mockDb.prepare).toHaveBeenCalledWith(
+          expect.stringContaining("UPDATE searches"),
+        );
+        expect(mockStatement.run).toHaveBeenCalledWith([
+          1, // boolean true converted to integer
+          expect.any(String), // favorited_at timestamp
+          "existingword",
+        ]);
+      });
+
+      it("removes word from favorites", async () => {
+        // Mock checkStmt.step() to return true (word exists)
+        mockStatement.step.mockReturnValue(true);
+
+        await dbService.toggleFavorite("existingword", false);
+
+        expect(mockStatement.run).toHaveBeenCalledWith([
+          0, // boolean false converted to integer
+          null, // favorited_at is null when removing favorite
+          "existingword",
+        ]);
+      });
+    });
+
+    describe("isFavorite", () => {
+      it("returns true for favorite word", async () => {
+        mockStatement.step.mockReturnValue(true);
+        mockStatement.getAsObject.mockReturnValue({ isFavorite: 1 });
+
+        const result = await dbService.isFavorite("favoriteword");
+
+        expect(result).toBe(true);
+        expect(mockDb.prepare).toHaveBeenCalledWith(
+          expect.stringContaining("SELECT COALESCE(is_favorite, 0)"),
+        );
+      });
+
+      it("returns false for non-favorite word", async () => {
+        mockStatement.step.mockReturnValue(true);
+        mockStatement.getAsObject.mockReturnValue({ isFavorite: 0 });
+
+        const result = await dbService.isFavorite("normalword");
+
+        expect(result).toBe(false);
+      });
+
+      it("returns false for non-existent word", async () => {
+        mockStatement.step.mockReturnValue(false);
+
+        const result = await dbService.isFavorite("nonexistent");
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("getSearchHistory with favorites filter", () => {
+      it("returns all history when favoritesOnly is false", async () => {
+        const mockHistory = [
+          {
+            id: 1,
+            word: "test",
+            searchCount: 3,
+            lastSearched: "2024-01-01",
+            createdAt: "2024-01-01",
+            isFavorite: 1,
+            favoritedAt: "2024-01-01",
+          },
+          {
+            id: 2,
+            word: "example",
+            searchCount: 1,
+            lastSearched: "2024-01-02",
+            createdAt: "2024-01-02",
+            isFavorite: 0,
+            favoritedAt: null,
+          },
+        ];
+
+        let callCount = 0;
+        mockStatement.step.mockImplementation(() => {
+          return callCount++ < mockHistory.length;
+        });
+
+        mockStatement.getAsObject.mockImplementation(() => {
+          const index = callCount - 1;
+          return index < mockHistory.length ? mockHistory[index] : {};
+        });
+
+        const result = await dbService.getSearchHistory(false);
+
+        expect(mockDb.prepare).toHaveBeenCalledWith(
+          expect.stringContaining("COALESCE(is_favorite, 0) as isFavorite"),
+        );
+        expect(result).toHaveLength(2);
+        expect(result[0].isFavorite).toBe(true);
+        expect(result[1].isFavorite).toBe(false);
+      });
+
+      it("returns only favorites when favoritesOnly is true", async () => {
+        const mockHistory = [
+          {
+            id: 1,
+            word: "favorite",
+            searchCount: 3,
+            lastSearched: "2024-01-01",
+            createdAt: "2024-01-01",
+            isFavorite: 1,
+            favoritedAt: "2024-01-01",
+          },
+        ];
+
+        let callCount = 0;
+        mockStatement.step.mockImplementation(() => {
+          return callCount++ < mockHistory.length;
+        });
+
+        mockStatement.getAsObject.mockImplementation(() => {
+          const index = callCount - 1;
+          return index < mockHistory.length ? mockHistory[index] : {};
+        });
+
+        const result = await dbService.getSearchHistory(true);
+
+        expect(mockDb.prepare).toHaveBeenCalledWith(
+          expect.stringContaining("WHERE is_favorite = 1"),
+        );
+        expect(result).toHaveLength(1);
+        expect(result[0].word).toBe("favorite");
+        expect(result[0].isFavorite).toBe(true);
+      });
     });
   });
 

@@ -7,8 +7,12 @@ import type {
 } from "@shared/types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  searchHistory: () => ipcRenderer.invoke("search-history"),
+  searchHistory: (favoritesOnly?: boolean) =>
+    ipcRenderer.invoke("search-history", favoritesOnly),
   addSearch: (word: string) => ipcRenderer.invoke("add-search", word),
+  toggleFavorite: (word: string, isFavorite: boolean) =>
+    ipcRenderer.invoke("toggle-favorite", word, isFavorite),
+  isFavorite: (word: string) => ipcRenderer.invoke("is-favorite", word),
   searchImages: (word: string, options?: PaginationOptions) =>
     ipcRenderer.invoke("search-images", word, options),
   generatePhrases: (word: string) =>

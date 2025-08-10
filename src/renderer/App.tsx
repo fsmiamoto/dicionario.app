@@ -6,6 +6,7 @@ import VisualContext from "./components/VisualContext";
 import ExamplePhrases from "./components/ExamplePhrases";
 import SettingsModal from "./components/SettingsModal";
 import AnkiCardCreator from "./components/AnkiCardCreator";
+import SearchHistoryPage from "./components/SearchHistoryPage";
 import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
 import type {
   SearchResult,
@@ -32,6 +33,10 @@ function App() {
   const [selectedImages, setSelectedImages] = useState<ImageResult[]>([]);
   const [ankiMode, setAnkiMode] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [currentPage, setCurrentPage] = useState<"search" | "history">(
+    "search",
+  );
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const searchBarRef = useRef<SearchBarRef>(null);
 
   // Load settings on component mount
@@ -47,6 +52,52 @@ function App() {
 
     loadSettings();
   }, []);
+
+  // Check favorite status when current word changes
+  useEffect(() => {
+    if (currentWord) {
+      const checkFavoriteStatus = async () => {
+        try {
+          const favoriteStatus =
+            await window.electronAPI.isFavorite(currentWord);
+          setIsFavorite(favoriteStatus);
+        } catch (error) {
+          console.error("Failed to check favorite status:", error);
+          setIsFavorite(false);
+        }
+      };
+      checkFavoriteStatus();
+    } else {
+      setIsFavorite(false);
+    }
+  }, [currentWord]);
+
+  const handleNavigateToHistory = () => {
+    setCurrentPage("history");
+  };
+
+  const handleNavigateToSearch = () => {
+    setCurrentPage("search");
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!currentWord) return;
+
+    try {
+      const newFavoriteStatus = !isFavorite;
+      await window.electronAPI.toggleFavorite(currentWord, newFavoriteStatus);
+      setIsFavorite(newFavoriteStatus);
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    }
+  };
+
+  const handleSearchFromHistory = (word: string) => {
+    // Navigate to search page first
+    setCurrentPage('search');
+    // Then perform the search
+    handleSearch(word);
+  };
 
   const handleAnkiModeToggle = () => {
     setAnkiMode(!ankiMode);
@@ -244,20 +295,54 @@ function App() {
   return (
     <div className="min-h-screen bg-surface-100 text-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <Header onSettingsClick={() => setShowSettings(true)} />
+        <Header
+          onSettingsClick={() => setShowSettings(true)}
+          onHistoryClick={handleNavigateToHistory}
+        />
 
-        <div className="mt-8">
-          <SearchBar
-            ref={searchBarRef}
-            onSearch={handleSearch}
-            isLoading={isLoading}
-          />
-        </div>
+        {currentPage === "search" && (
+          <div className="mt-8">
+            <SearchBar
+              ref={searchBarRef}
+              onSearch={handleSearch}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
 
-        {currentWord && (
+        {currentPage === "search" && currentWord && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">"{currentWord}"</h2>
+              <div className="flex items-center space-x-3">
+                <h2 className="text-2xl font-bold text-white">
+                  "{currentWord}"
+                </h2>
+                <button
+                  onClick={handleToggleFavorite}
+                  className={`p-2 transition-colors ${
+                    isFavorite
+                      ? "text-red-500 hover:text-red-400"
+                      : "text-dark-400 hover:text-red-400"
+                  }`}
+                  title={
+                    isFavorite ? "Remove from favorites" : "Add to favorites"
+                  }
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill={isFavorite ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
 
               {/* Anki Controls */}
               {settings?.anki?.enabled && searchResult && (
@@ -343,6 +428,34 @@ function App() {
                 />
               </div>
             )}
+          </div>
+        )}
+
+        {currentPage === "history" && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Search History</h2>
+              <button
+                onClick={handleNavigateToSearch}
+                className="px-4 py-2 bg-surface-300 hover:bg-surface-400 text-white rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                <span>Back to Search</span>
+              </button>
+            </div>
+            <SearchHistoryPage onSearch={handleSearchFromHistory} />
           </div>
         )}
       </div>

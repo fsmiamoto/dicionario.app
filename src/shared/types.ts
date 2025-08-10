@@ -4,6 +4,8 @@ export interface SearchHistory {
   searchCount: number;
   lastSearched: string;
   createdAt: string;
+  isFavorite: boolean;
+  favoritedAt?: string;
 }
 
 export interface ExamplePhrase {
@@ -80,8 +82,10 @@ export interface AppSettings {
 }
 
 export interface ElectronAPI {
-  searchHistory: () => Promise<SearchHistory[]>;
+  searchHistory: (favoritesOnly?: boolean) => Promise<SearchHistory[]>;
   addSearch: (word: string) => Promise<void>;
+  toggleFavorite: (word: string, isFavorite: boolean) => Promise<void>;
+  isFavorite: (word: string) => Promise<boolean>;
   searchImages: (
     word: string,
     options?: PaginationOptions,
