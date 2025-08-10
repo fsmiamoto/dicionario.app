@@ -7,6 +7,7 @@ import ExamplePhrases from "./components/ExamplePhrases";
 import SettingsModal from "./components/SettingsModal";
 import AnkiCardCreator from "./components/AnkiCardCreator";
 import SearchHistoryPage from "./components/SearchHistoryPage";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
 import type {
   SearchResult,
@@ -293,65 +294,93 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-surface-100 text-white">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <Header
-          onSettingsClick={() => setShowSettings(true)}
-          onHistoryClick={handleNavigateToHistory}
-        />
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <Header
+            onSettingsClick={() => setShowSettings(true)}
+            onHistoryClick={handleNavigateToHistory}
+          />
 
-        {currentPage === "search" && (
-          <div className="mt-8">
-            <SearchBar
-              ref={searchBarRef}
-              onSearch={handleSearch}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
+          {currentPage === "search" && (
+            <div className="mt-8">
+              <SearchBar
+                ref={searchBarRef}
+                onSearch={handleSearch}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
 
-        {currentPage === "search" && currentWord && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <h2 className="text-2xl font-bold text-white">
-                  "{currentWord}"
-                </h2>
-                <button
-                  onClick={handleToggleFavorite}
-                  className={`p-2 transition-colors ${
-                    isFavorite
-                      ? "text-red-500 hover:text-red-400"
-                      : "text-dark-400 hover:text-red-400"
-                  }`}
-                  title={
-                    isFavorite ? "Remove from favorites" : "Add to favorites"
-                  }
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill={isFavorite ? "currentColor" : "none"}
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Anki Controls */}
-              {settings?.anki?.enabled && searchResult && (
+          {currentPage === "search" && currentWord && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  {ankiMode && (
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    "{currentWord}"
+                  </h2>
+                  <button
+                    onClick={handleToggleFavorite}
+                    className={`p-2 transition-colors ${
+                      isFavorite
+                        ? "text-red-500 hover:text-red-400"
+                        : "text-gray-400 hover:text-red-400"
+                    }`}
+                    title={
+                      isFavorite ? "Remove from favorites" : "Add to favorites"
+                    }
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill={isFavorite ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Anki Controls */}
+                {settings?.anki?.enabled && searchResult && (
+                  <div className="flex items-center space-x-3">
+                    {ankiMode && (
+                      <button
+                        onClick={handleCreateAnkiCards}
+                        disabled={selectedPhrases.length === 0}
+                        className="px-4 py-2 bg-gradient-primary hover:bg-gradient-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center space-x-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                          />
+                        </svg>
+                        <span>
+                          Create Anki Cards ({selectedPhrases.length})
+                        </span>
+                      </button>
+                    )}
+
                     <button
-                      onClick={handleCreateAnkiCards}
-                      disabled={selectedPhrases.length === 0}
-                      className="px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-dark-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+                      onClick={handleAnkiModeToggle}
+                      className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                        ankiMode
+                          ? "bg-secondary-500 hover:bg-secondary-600 text-white shadow-md"
+                          : "btn-secondary"
+                      }`}
                     >
                       <svg
                         className="w-4 h-4"
@@ -366,115 +395,91 @@ function App() {
                           d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                         />
                       </svg>
-                      <span>Create Anki Cards ({selectedPhrases.length})</span>
+                      <span>{ankiMode ? "Exit Anki Mode" : "Anki Mode"}</span>
                     </button>
-                  )}
+                  </div>
+                )}
+              </div>
 
-                  <button
-                    onClick={handleAnkiModeToggle}
-                    className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                      ankiMode
-                        ? "bg-red-500 hover:bg-red-600 text-white"
-                        : "bg-surface-300 hover:bg-surface-400 text-white"
-                    }`}
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                    <span>{ankiMode ? "Exit Anki Mode" : "Anki Mode"}</span>
-                  </button>
+              {/* Word Explanation Section */}
+              <WordExplanation
+                word={currentWord}
+                explanation={explanation}
+                isLoading={isLoading}
+              />
+
+              {/* Images and Phrases Grid */}
+              {searchResult && paginatedImages && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <VisualContext
+                    images={searchResult.images}
+                    word={currentWord}
+                    isLoading={isImagesLoading}
+                    currentPage={paginatedImages.currentPage}
+                    totalPages={paginatedImages.totalPages}
+                    onPageChange={handlePageChange}
+                    selectedImages={selectedImages}
+                    onImageSelection={setSelectedImages}
+                    showAnkiControls={ankiMode}
+                  />
+
+                  <ExamplePhrases
+                    phrases={searchResult.phrases}
+                    isLoading={isLoading}
+                    selectedPhrases={selectedPhrases}
+                    onPhraseSelection={setSelectedPhrases}
+                    showAnkiControls={ankiMode}
+                  />
                 </div>
               )}
             </div>
+          )}
 
-            {/* Word Explanation Section */}
-            <WordExplanation
-              word={currentWord}
-              explanation={explanation}
-              isLoading={isLoading}
-            />
-
-            {/* Images and Phrases Grid */}
-            {searchResult && paginatedImages && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <VisualContext
-                  images={searchResult.images}
-                  word={currentWord}
-                  isLoading={isImagesLoading}
-                  currentPage={paginatedImages.currentPage}
-                  totalPages={paginatedImages.totalPages}
-                  onPageChange={handlePageChange}
-                  selectedImages={selectedImages}
-                  onImageSelection={setSelectedImages}
-                  showAnkiControls={ankiMode}
-                />
-
-                <ExamplePhrases
-                  phrases={searchResult.phrases}
-                  isLoading={isLoading}
-                  selectedPhrases={selectedPhrases}
-                  onPhraseSelection={setSelectedPhrases}
-                  showAnkiControls={ankiMode}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {currentPage === "history" && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">Search History</h2>
-              <button
-                onClick={handleNavigateToSearch}
-                className="px-4 py-2 bg-surface-300 hover:bg-surface-400 text-white rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          {currentPage === "history" && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Search History</h2>
+                <button
+                  onClick={handleNavigateToSearch}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors flex items-center space-x-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                <span>Back to Search</span>
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  <span>Back to Search</span>
+                </button>
+              </div>
+              <SearchHistoryPage onSearch={handleSearchFromHistory} />
             </div>
-            <SearchHistoryPage onSearch={handleSearchFromHistory} />
-          </div>
-        )}
+          )}
+        </div>
+
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+
+        <AnkiCardCreator
+          word={currentWord}
+          explanation={explanation}
+          selectedPhrases={selectedPhrases}
+          selectedImages={selectedImages}
+          isOpen={showAnkiCardCreator}
+          onClose={() => setShowAnkiCardCreator(false)}
+          onCreateCard={handleAnkiCardsCreated}
+        />
       </div>
-
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
-
-      <AnkiCardCreator
-        word={currentWord}
-        explanation={explanation}
-        selectedPhrases={selectedPhrases}
-        selectedImages={selectedImages}
-        isOpen={showAnkiCardCreator}
-        onClose={() => setShowAnkiCardCreator(false)}
-        onCreateCard={handleAnkiCardsCreated}
-      />
-    </div>
+    </ThemeProvider>
   );
 }
 

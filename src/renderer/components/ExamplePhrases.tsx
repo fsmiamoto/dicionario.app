@@ -138,22 +138,28 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      "Descriptive/Aesthetic": "bg-purple-500/20 text-purple-300",
-      "Practical/Work": "bg-blue-500/20 text-blue-300",
-      "Question/Amazement": "bg-green-500/20 text-green-300",
-      "Memory/Emotion": "bg-orange-500/20 text-orange-300",
-      "Learning/Question": "bg-pink-500/20 text-pink-300",
+      "Descriptive/Aesthetic":
+        "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300",
+      "Practical/Work":
+        "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300",
+      "Question/Amazement":
+        "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300",
+      "Memory/Emotion":
+        "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300",
+      "Learning/Question":
+        "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300",
     };
 
     return (
-      colors[category as keyof typeof colors] || "bg-gray-500/20 text-gray-300"
+      colors[category as keyof typeof colors] ||
+      "bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-300"
     );
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
           <svg
             className="w-5 h-5"
             fill="none"
@@ -169,7 +175,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
           </svg>
           <span>Example Phrases</span>
           {showAnkiControls && selectedPhrases.length > 0 && (
-            <span className="text-sm text-primary-400">
+            <span className="text-sm text-primary-600 dark:text-primary-400">
               ({selectedPhrases.length} selected)
             </span>
           )}
@@ -179,14 +185,14 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
           <div className="flex items-center space-x-2 text-sm">
             <button
               onClick={handleSelectAll}
-              className="text-primary-400 hover:text-primary-300 transition-colors"
+              className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
             >
               Select All
             </button>
-            <span className="text-dark-400">|</span>
+            <span className="text-gray-600 dark:text-gray-400">|</span>
             <button
               onClick={handleDeselectAll}
-              className="text-primary-400 hover:text-primary-300 transition-colors"
+              className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
             >
               Deselect All
             </button>
@@ -198,15 +204,15 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
         {isLoading
           ? Array.from({ length: 5 }).map((_, index) => (
               <div key={index} className="card animate-pulse">
-                <div className="h-4 bg-surface-300 rounded mb-2"></div>
-                <div className="h-3 bg-surface-300 rounded mb-3 w-3/4"></div>
-                <div className="h-6 bg-surface-300 rounded w-24"></div>
+                <div className="h-4 bg-gray-300 dark:bg-slate-700 rounded mb-2"></div>
+                <div className="h-3 bg-gray-300 dark:bg-slate-700 rounded mb-3 w-3/4"></div>
+                <div className="h-6 bg-gray-300 dark:bg-slate-700 rounded w-24"></div>
               </div>
             ))
           : phrases.map((phrase, index) => (
               <div
                 key={index}
-                className={`card group hover:bg-surface-300 transition-colors ${
+                className={`card group hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${
                   showAnkiControls && isPhraseSelected(phrase)
                     ? "ring-2 ring-primary-500"
                     : ""
@@ -219,14 +225,14 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
                         type="checkbox"
                         checked={isPhraseSelected(phrase)}
                         onChange={() => handlePhraseToggle(phrase)}
-                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500 mt-1"
+                        className="w-4 h-4 text-primary-500 bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 mt-1"
                       />
                     )}
                     <div className="flex-1 space-y-2">
-                      <p className="text-white font-medium leading-relaxed">
+                      <p className="text-gray-900 dark:text-white font-medium leading-relaxed">
                         {phrase.text}
                       </p>
-                      <p className="text-dark-400 italic text-sm">
+                      <p className="text-gray-600 dark:text-gray-400 italic text-sm">
                         {phrase.translation}
                       </p>
                     </div>
@@ -235,7 +241,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => handlePlayAudio(phrase.text)}
-                      className="p-2 text-dark-400 hover:text-white transition-colors"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       title="Play audio"
                     >
                       {playingAudio === phrase.text ? (
@@ -271,7 +277,7 @@ const ExamplePhrases: React.FC<ExamplePhrasesProps> = ({
 
                     <button
                       onClick={() => handleCopyPhrase(phrase)}
-                      className="p-2 text-dark-400 hover:text-white transition-colors"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       title="Copy phrase"
                     >
                       {copiedPhrase === phrase.text ? (

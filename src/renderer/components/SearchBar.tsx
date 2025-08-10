@@ -149,7 +149,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5 text-dark-400"
+                className="h-5 w-5 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -183,7 +183,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(
                   setShowRecentSearches(false);
                   inputRef.current?.focus();
                 }}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-dark-400 hover:text-white transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <svg
                   className="h-5 w-5"
@@ -221,10 +221,10 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(
         {showDropdown && filteredHistory.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-surface-200 border border-surface-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
           >
             {showRecentSearches && !query.trim() && (
-              <div className="px-4 py-2 text-dark-400 text-sm font-medium border-b border-surface-300 bg-surface-100">
+              <div className="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm font-medium border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900">
                 Recent Searches
               </div>
             )}
@@ -232,13 +232,15 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(
               <button
                 key={item.id}
                 onClick={() => handleSelectFromHistory(item.word)}
-                className={`w-full px-4 py-3 text-left hover:bg-surface-300 transition-colors border-b border-surface-300 last:border-b-0 ${
-                  index === selectedIndex ? "bg-surface-300" : ""
+                className={`w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
+                  index === selectedIndex ? "bg-gray-100 dark:bg-slate-700" : ""
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-medium">{item.word}</span>
-                  <div className="flex items-center space-x-2 text-dark-400 text-sm">
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {item.word}
+                  </span>
+                  <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 text-sm">
                     <span>{item.searchCount} times</span>
                     <span>•</span>
                     <span>
