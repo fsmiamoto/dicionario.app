@@ -31,7 +31,7 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
     <div className="mb-6">
       <div className="card">
         <div className="flex items-start justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
             <svg
               className="w-6 h-6 text-blue-400"
               fill="none"
@@ -51,7 +51,7 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
           {explanation && (
             <button
               onClick={handleCopyExplanation}
-              className="p-2 text-dark-400 hover:text-white transition-colors"
+              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               title="Copy explanation"
             >
               {copied ? (
@@ -90,9 +90,9 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
         <div className="space-y-4">
           {isLoading ? (
             <div className="space-y-3 animate-pulse">
-              <div className="h-4 bg-surface-300 rounded w-full"></div>
-              <div className="h-4 bg-surface-300 rounded w-5/6"></div>
-              <div className="h-4 bg-surface-300 rounded w-4/6"></div>
+              <div className="h-4 bg-gray-300 dark:bg-slate-700 rounded w-full"></div>
+              <div className="h-4 bg-gray-300 dark:bg-slate-700 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-300 dark:bg-slate-700 rounded w-4/6"></div>
             </div>
           ) : explanation ? (
             <div className="prose prose-invert max-w-none">
@@ -101,46 +101,52 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
                 components={{
                   // Customize markdown components to match dark theme
                   h1: ({ children }) => (
-                    <h1 className="text-xl font-semibold text-white mb-3 mt-4 first:mt-0">
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-4 first:mt-0">
                       {children}
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="text-lg font-semibold text-white mb-2 mt-3 first:mt-0">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-3 first:mt-0">
                       {children}
                     </h2>
                   ),
                   h3: ({ children }) => (
-                    <h3 className="text-base font-semibold text-white mb-2 mt-3 first:mt-0">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2 mt-3 first:mt-0">
                       {children}
                     </h3>
                   ),
                   p: ({ children }) => (
-                    <p className="text-white mb-3 last:mb-0">{children}</p>
+                    <p className="text-gray-900 dark:text-white mb-3 last:mb-0">
+                      {children}
+                    </p>
                   ),
                   ul: ({ children }) => (
-                    <ul className="text-white mb-3 last:mb-0 pl-4">
+                    <ul className="text-gray-900 dark:text-white mb-3 last:mb-0 pl-4">
                       {children}
                     </ul>
                   ),
                   ol: ({ children }) => (
-                    <ol className="text-white mb-3 last:mb-0 pl-4">
+                    <ol className="text-gray-900 dark:text-white mb-3 last:mb-0 pl-4">
                       {children}
                     </ol>
                   ),
                   li: ({ children }) => (
-                    <li className="text-white mb-1 last:mb-0">{children}</li>
+                    <li className="text-gray-900 dark:text-white mb-1 last:mb-0">
+                      {children}
+                    </li>
                   ),
                   strong: ({ children }) => (
-                    <strong className="font-semibold text-blue-300">
+                    <strong className="font-semibold text-primary-600 dark:text-primary-400">
                       {children}
                     </strong>
                   ),
                   em: ({ children }) => (
-                    <em className="italic text-gray-300">{children}</em>
+                    <em className="italic text-gray-600 dark:text-gray-300">
+                      {children}
+                    </em>
                   ),
                   code: ({ children }) => (
-                    <code className="bg-surface-300 text-blue-300 px-1 py-0.5 rounded text-sm">
+                    <code className="bg-gray-200 dark:bg-slate-700 text-primary-600 dark:text-primary-400 px-1 py-0.5 rounded text-sm">
                       {children}
                     </code>
                   ),
@@ -150,15 +156,15 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
               </ReactMarkdown>
             </div>
           ) : (
-            <div className="text-dark-400 italic text-sm">
+            <div className="text-gray-600 dark:text-gray-400 italic text-sm">
               No explanation available for this word.
             </div>
           )}
         </div>
 
         {explanation && !isLoading && (
-          <div className="mt-4 pt-4 border-t border-surface-300">
-            <div className="flex items-center text-xs text-dark-400">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
               <svg
                 className="w-4 h-4 mr-1"
                 fill="none"

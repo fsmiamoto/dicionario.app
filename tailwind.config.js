@@ -8,26 +8,33 @@ export default {
     extend: {
       colors: {
         primary: {
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#A78BFA',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+          800: '#5B21B6',
+          900: '#4C1D95',
         },
-        dark: {
-          100: '#1e293b',
-          200: '#334155',
-          300: '#475569',
-          400: '#64748b',
-          500: '#94a3b8',
-          600: '#cbd5e1',
-          700: '#e2e8f0',
-          800: '#f1f5f9',
-          900: '#f8fafc',
-        },
-        surface: {
-          100: '#0f172a',
-          200: '#1e293b',
-          300: '#334155',
+        secondary: {
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          300: '#FCA5A5',
+          400: '#F87171',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+          800: '#991B1B',
+          900: '#7F1D1D',
         }
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(135deg, #8B5CF6 0%, #EF4444 100%)',
+        'gradient-primary-hover': 'linear-gradient(135deg, #7C3AED 0%, #DC2626 100%)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

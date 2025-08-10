@@ -34,7 +34,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={handlePrevious}
         disabled={currentPage <= 1 || isLoading}
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-white bg-surface-400 rounded-lg hover:bg-surface-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white bg-gray-200 dark:bg-slate-700 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <svg
           className="w-4 h-4"
@@ -53,7 +53,7 @@ const Pagination: React.FC<PaginationProps> = ({
       </button>
 
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           Page {currentPage} of {totalPages}
         </span>
         <div className="flex space-x-1">
@@ -69,7 +69,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 className={`w-8 h-8 text-xs font-medium rounded-full transition-colors ${
                   isCurrentPage
                     ? "bg-primary-500 text-white"
-                    : "bg-surface-400 text-gray-300 hover:bg-surface-300"
+                    : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {pageNumber}
@@ -82,7 +82,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={handleNext}
         disabled={currentPage >= totalPages || isLoading}
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-white bg-surface-400 rounded-lg hover:bg-surface-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white bg-gray-200 dark:bg-slate-700 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <span>Next</span>
         <svg

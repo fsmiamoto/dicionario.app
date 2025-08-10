@@ -99,12 +99,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface-200 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-surface-300">
+      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700 shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">Settings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Settings
+          </h2>
           <button
             onClick={onClose}
-            className="text-dark-400 hover:text-white transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -125,10 +127,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         <div className="space-y-6">
           {/* API Keys Section */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">API Keys</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              API Keys
+            </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   Google API Key (for image search & TTS)
                 </label>
                 <input
@@ -143,7 +147,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   OpenAI API Key (for phrase generation & TTS)
                 </label>
                 <input
@@ -158,7 +162,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   Google Search Engine ID (for image search)
                 </label>
                 <input
@@ -176,9 +180,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Language Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">Language</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Language
+            </h3>
             <div>
-              <label className="block text-sm font-medium text-dark-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Preferred Language
               </label>
               <select
@@ -203,11 +209,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Image Search Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Image Search
             </h3>
             <div>
-              <label className="block text-sm font-medium text-dark-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Image Search Provider
               </label>
               <select
@@ -227,12 +233,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Voice Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Voice Settings
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   TTS Provider
                 </label>
                 <select
@@ -249,7 +255,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-dark-400 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   Voice Language
                 </label>
                 <select
@@ -276,7 +282,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               {/* OpenAI Voice Selection */}
               {settings.voiceSettings.provider === "openai" && (
                 <div>
-                  <label className="block text-sm font-medium text-dark-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                     OpenAI Voice
                   </label>
                   <select
@@ -300,7 +306,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           {/* Anki Integration Settings */}
           <div>
-            <h3 className="text-lg font-medium text-white mb-4 flex items-center space-x-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -319,7 +325,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
             {/* Connection Status */}
             <div
-              className={`p-3 rounded-lg mb-4 ${ankiConnected ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"}`}
+              className={`p-3 rounded-lg mb-4 ${ankiConnected ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -361,7 +367,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={testAnkiConnection}
                   disabled={testingAnkiConnection}
-                  className="text-xs bg-surface-300 hover:bg-surface-400 text-white px-3 py-1 rounded transition-colors disabled:opacity-50"
+                  className="text-xs bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-900 dark:text-white px-3 py-1 rounded transition-colors disabled:opacity-50"
                 >
                   {testingAnkiConnection ? "Testing..." : "Test"}
                 </button>
@@ -378,11 +384,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     handleAnkiSettingChange("enabled", e.target.checked)
                   }
-                  className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-500 bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                 />
                 <label
                   htmlFor="anki-enabled"
-                  className="text-sm font-medium text-white"
+                  className="text-sm font-medium text-gray-900 dark:text-white"
                 >
                   Enable Anki Integration
                 </label>
@@ -391,7 +397,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               {settings.anki.enabled && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-dark-400 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       Deck Name
                     </label>
                     <input
@@ -403,14 +409,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                       placeholder="Dicionario::Vocabulary"
                       className="input-field w-full"
                     />
-                    <p className="text-xs text-dark-400 mt-1">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                       Use :: to create nested decks (e.g.,
                       "Language::Japanese::Vocabulary")
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-dark-400 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       Card Template
                     </label>
                     <select
@@ -437,11 +443,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                             e.target.checked,
                           )
                         }
-                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                        className="w-4 h-4 text-primary-500 bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                       />
                       <label
                         htmlFor="anki-include-audio"
-                        className="text-sm font-medium text-white"
+                        className="text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Include Audio in Cards
                       </label>
@@ -458,11 +464,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                             e.target.checked,
                           )
                         }
-                        className="w-4 h-4 text-primary-500 bg-surface-300 border-surface-400 rounded focus:ring-primary-500"
+                        className="w-4 h-4 text-primary-500 bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                       />
                       <label
                         htmlFor="anki-include-images"
-                        className="text-sm font-medium text-white"
+                        className="text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Include Images in Cards
                       </label>
@@ -473,12 +479,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             {!ankiConnected && (
-              <div className="mt-4 p-3 bg-surface-300 rounded-lg">
-                <p className="text-sm text-dark-400">
-                  <strong className="text-white">Setup Instructions:</strong>
+              <div className="mt-4 p-3 bg-gray-100 dark:bg-slate-700 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <strong className="text-gray-900 dark:text-white">
+                    Setup Instructions:
+                  </strong>
                   <br />
                   1. Install Anki from{" "}
-                  <span className="text-primary-400">
+                  <span className="text-primary-600 dark:text-primary-400">
                     https://apps.ankiweb.net
                   </span>
                   <br />
@@ -512,11 +520,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Help Text */}
-        <div className="mt-6 p-4 bg-surface-300 rounded-lg">
-          <p className="text-sm text-dark-400">
-            <strong className="text-white">Note:</strong> API keys are stored
-            locally and are only used to enhance functionality. The app works
-            with mock data when no keys are provided.
+        <div className="mt-6 p-4 bg-gray-100 dark:bg-slate-700 rounded-lg">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            <strong className="text-gray-900 dark:text-white">Note:</strong> API
+            keys are stored locally and are only used to enhance functionality.
+            The app works with mock data when no keys are provided.
           </p>
         </div>
       </div>
