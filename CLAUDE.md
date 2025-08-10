@@ -19,6 +19,10 @@ It provides visual context, intelligent explanations, and example phrases with a
 - When creating a new component, check how the current components are written and follow the same conventions.
 - Include Unit Tests for all new code introduced.
 
+## Git
+- DON'T add that Claude wrote the code in the commit messages
+- Each PR should only have one commit, if you need to make changes, amend the latest commit
+
 ## Project Structure
 ```
 src/

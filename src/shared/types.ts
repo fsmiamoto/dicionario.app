@@ -38,6 +38,16 @@ export interface SearchResult {
   phrases: ExamplePhrase[];
 }
 
+export interface PromptTemplate {
+  system: string;
+  user: string;
+}
+
+export interface RenderedPrompt {
+  systemPrompt: string;
+  userPrompt: string;
+}
+
 export interface AnkiCard {
   word: string;
   explanation: string;
