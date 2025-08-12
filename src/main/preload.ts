@@ -4,6 +4,7 @@ import type {
   ElectronAPI,
   PaginationOptions,
   AnkiCard,
+  AnkiFieldMapping,
 } from "@shared/types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -28,10 +29,35 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Anki operations
   ankiTestConnection: () => ipcRenderer.invoke("anki-test-connection"),
   ankiGetDecks: () => ipcRenderer.invoke("anki-get-decks"),
-  ankiCreateCard: (card: AnkiCard, deckName?: string) =>
-    ipcRenderer.invoke("anki-create-card", card, deckName),
-  ankiCreateCards: (cards: AnkiCard[], deckName?: string) =>
-    ipcRenderer.invoke("anki-create-cards", cards, deckName),
+  ankiGetModels: () => ipcRenderer.invoke("anki-get-models"),
+  ankiGetModelFields: (modelName: string) =>
+    ipcRenderer.invoke("anki-get-model-fields", modelName),
+  ankiCreateCard: (
+    card: AnkiCard,
+    deckName?: string,
+    modelName?: string,
+    fieldMappings?: AnkiFieldMapping[],
+  ) =>
+    ipcRenderer.invoke(
+      "anki-create-card",
+      card,
+      deckName,
+      modelName,
+      fieldMappings,
+    ),
+  ankiCreateCards: (
+    cards: AnkiCard[],
+    deckName?: string,
+    modelName?: string,
+    fieldMappings?: AnkiFieldMapping[],
+  ) =>
+    ipcRenderer.invoke(
+      "anki-create-cards",
+      cards,
+      deckName,
+      modelName,
+      fieldMappings,
+    ),
 } as ElectronAPI);
 
 declare global {

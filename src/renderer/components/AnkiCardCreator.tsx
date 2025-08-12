@@ -4,6 +4,8 @@ import type {
   ExamplePhrase,
   ImageResult,
   AppSettings,
+  AnkiFieldMapping,
+  DicionarioDataType,
 } from "@shared/types";
 
 interface AnkiCardCreatorProps {
@@ -123,7 +125,12 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
       }
 
       // Create the cards
-      const result = await window.electronAPI.ankiCreateCards(cards, deckName);
+      const result = await window.electronAPI.ankiCreateCards(
+        cards,
+        deckName,
+        settings?.anki.modelName,
+        settings?.anki.fieldMappings,
+      );
 
       if (result.success > 0) {
         alert(
@@ -144,6 +151,62 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const getDicionarioFieldContent = (
+    card: AnkiCard,
+    fieldType: DicionarioDataType,
+  ): string => {
+    switch (fieldType) {
+      case "word":
+        return card.word;
+      case "explanation":
+        return card.explanation || "";
+      case "phrase_text":
+        return card.phrase.text;
+      case "phrase_translation":
+        return card.phrase.translation;
+      case "phrase_category":
+        return card.phrase.category;
+      case "image":
+        return card.image ? "Image included" : "No image";
+      case "audio":
+        return card.audioUrl ? "Audio included" : "No audio";
+      default:
+        return "";
+    }
+  };
+
+  const generateFieldPreview = (card: AnkiCard): Record<string, string> => {
+    const fieldMappings = settings?.anki.fieldMappings || [];
+    const fields: Record<string, string> = {};
+
+    // If no field mappings, fall back to Front/Back
+    if (fieldMappings.length === 0) {
+      fields["Front"] = card.word;
+      fields["Back"] = [
+        card.explanation && `Explanation: ${card.explanation}`,
+        `Example: ${card.phrase.text}`,
+        card.phrase.translation,
+        card.phrase.category,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+      return fields;
+    }
+
+    for (const mapping of fieldMappings) {
+      const content = getDicionarioFieldContent(card, mapping.dicionarioField);
+      if (content) {
+        if (fields[mapping.ankiField]) {
+          fields[mapping.ankiField] += ` | ${content}`;
+        } else {
+          fields[mapping.ankiField] = content;
+        }
+      }
+    }
+
+    return fields;
   };
 
   if (!isOpen) return null;
@@ -302,56 +365,47 @@ const AnkiCardCreator: React.FC<AnkiCardCreatorProps> = ({
               {previewCards.length !== 1 ? "s" : ""})
             </h3>
             <div className="space-y-4 max-h-64 overflow-y-auto">
-              {previewCards.map((card, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Front */}
-                    <div>
-                      <h4 className="text-sm font-medium text-primary-400 mb-2">
-                        Front
-                      </h4>
-                      <div className="text-center">
-                        {includeImages && card.image && (
-                          <img
-                            src={card.image.thumbnail}
-                            alt={card.word}
-                            className="w-20 h-20 object-cover rounded mx-auto mb-2"
-                          />
-                        )}
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
-                          {card.word}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Back */}
-                    <div>
-                      <h4 className="text-sm font-medium text-primary-400 mb-2">
-                        Back
-                      </h4>
-                      <div className="text-sm text-gray-900 dark:text-white space-y-2">
-                        {card.explanation && (
-                          <div>
-                            <strong>Explanation:</strong> {card.explanation}
+              {previewCards.map((card, index) => {
+                const fieldsPreview = generateFieldPreview(card);
+                return (
+                  <div
+                    key={index}
+                    className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+                  >
+                    <div className="grid grid-cols-1 gap-4">
+                      {Object.entries(fieldsPreview).map(
+                        ([fieldName, content]) => (
+                          <div key={fieldName}>
+                            <h4 className="text-sm font-medium text-primary-400 mb-2">
+                              {fieldName}
+                            </h4>
+                            <div className="text-sm text-gray-900 dark:text-white">
+                              {includeImages &&
+                                card.image &&
+                                content.includes("Image") && (
+                                  <img
+                                    src={card.image.thumbnail}
+                                    alt={card.word}
+                                    className="w-16 h-16 object-cover rounded mb-2"
+                                  />
+                                )}
+                              <div className="break-words">{content}</div>
+                            </div>
                           </div>
-                        )}
-                        <div>
-                          <strong>Example:</strong> {card.phrase.text}
+                        ),
+                      )}
+                      {Object.keys(fieldsPreview).length === 0 && (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            No field mappings configured. Please configure field
+                            mappings in Settings.
+                          </p>
                         </div>
-                        <div className="text-gray-500 dark:text-gray-400 italic">
-                          {card.phrase.translation}
-                        </div>
-                        <div className="inline-block bg-primary-500/20 text-primary-300 px-2 py-1 rounded text-xs">
-                          {card.phrase.category}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

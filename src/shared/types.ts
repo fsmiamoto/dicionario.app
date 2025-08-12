@@ -58,12 +58,34 @@ export interface AnkiCard {
   audioUrl?: string;
 }
 
+export type DicionarioDataType =
+  | "word"
+  | "explanation"
+  | "phrase_text"
+  | "phrase_translation"
+  | "phrase_category"
+  | "image"
+  | "audio";
+
+export interface AnkiFieldMapping {
+  dicionarioField: DicionarioDataType;
+  ankiField: string;
+  includeHtml?: boolean;
+}
+
+export interface AnkiModelInfo {
+  name: string;
+  fields: string[];
+}
+
 export interface AnkiSettings {
   enabled: boolean;
   deckName: string;
   cardTemplate: "basic" | "cloze";
   includeAudio: boolean;
   includeImages: boolean;
+  modelName?: string;
+  fieldMappings?: AnkiFieldMapping[];
 }
 
 export interface AppSettings {
@@ -102,6 +124,8 @@ export interface ElectronAPI {
   // Anki operations
   ankiTestConnection: () => Promise<boolean>;
   ankiGetDecks: () => Promise<string[]>;
+  ankiGetModels: () => Promise<AnkiModelInfo[]>;
+  ankiGetModelFields: (modelName: string) => Promise<string[]>;
   ankiCreateCard: (card: AnkiCard, deckName?: string) => Promise<boolean>;
   ankiCreateCards: (
     cards: AnkiCard[],

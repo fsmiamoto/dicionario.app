@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import type { AppSettings } from "@shared/types";
+import type {
+  AppSettings,
+  AnkiModelInfo,
+  AnkiFieldMapping,
+  DicionarioDataType,
+} from "@shared/types";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -26,6 +31,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [ankiConnected, setAnkiConnected] = useState<boolean>(false);
   const [testingAnkiConnection, setTestingAnkiConnection] =
     useState<boolean>(false);
+  const [availableModels, setAvailableModels] = useState<AnkiModelInfo[]>([]);
+  const [loadingModels, setLoadingModels] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -87,6 +94,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     try {
       const connected = await window.electronAPI.ankiTestConnection();
       setAnkiConnected(connected);
+      if (connected) {
+        await loadModels();
+      }
     } catch (error) {
       console.error("Failed to test Anki connection:", error);
       setAnkiConnected(false);
@@ -94,6 +104,94 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       setTestingAnkiConnection(false);
     }
   };
+
+  const loadModels = async () => {
+    setLoadingModels(true);
+    try {
+      const models = await window.electronAPI.ankiGetModels();
+      setAvailableModels(models);
+
+      // Set default model if none is selected
+      if (!settings.anki.modelName && models.length > 0) {
+        const basicModel = models.find((m) => m.name === "Basic") || models[0];
+        handleAnkiSettingChange("modelName", basicModel.name);
+
+        // Set default field mappings for Basic model
+        if (basicModel.name === "Basic" && !settings.anki.fieldMappings) {
+          const defaultMappings: AnkiFieldMapping[] = [
+            { dicionarioField: "word", ankiField: "Front", includeHtml: true },
+            {
+              dicionarioField: "explanation",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            {
+              dicionarioField: "phrase_text",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            {
+              dicionarioField: "phrase_translation",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            { dicionarioField: "image", ankiField: "Back", includeHtml: true },
+          ];
+          handleAnkiSettingChange("fieldMappings", defaultMappings);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load Anki models:", error);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
+  const handleModelChange = (modelName: string) => {
+    handleAnkiSettingChange("modelName", modelName);
+    // Reset field mappings when model changes
+    handleAnkiSettingChange("fieldMappings", []);
+  };
+
+  const handleFieldMappingChange = (
+    index: number,
+    field: keyof AnkiFieldMapping,
+    value: any,
+  ) => {
+    const currentMappings = settings.anki.fieldMappings || [];
+    const updatedMappings = [...currentMappings];
+    updatedMappings[index] = { ...updatedMappings[index], [field]: value };
+    handleAnkiSettingChange("fieldMappings", updatedMappings);
+  };
+
+  const addFieldMapping = () => {
+    const currentMappings = settings.anki.fieldMappings || [];
+    const newMapping: AnkiFieldMapping = {
+      dicionarioField: "word",
+      ankiField: "",
+      includeHtml: false,
+    };
+    handleAnkiSettingChange("fieldMappings", [...currentMappings, newMapping]);
+  };
+
+  const removeFieldMapping = (index: number) => {
+    const currentMappings = settings.anki.fieldMappings || [];
+    const updatedMappings = currentMappings.filter((_, i) => i !== index);
+    handleAnkiSettingChange("fieldMappings", updatedMappings);
+  };
+
+  const getDicionarioFieldOptions = (): {
+    value: DicionarioDataType;
+    label: string;
+  }[] => [
+    { value: "word", label: "Word" },
+    { value: "explanation", label: "Explanation" },
+    { value: "phrase_text", label: "Phrase Text" },
+    { value: "phrase_translation", label: "Phrase Translation" },
+    { value: "phrase_category", label: "Phrase Category" },
+    { value: "image", label: "Image" },
+    { value: "audio", label: "Audio" },
+  ];
 
   if (!isOpen) return null;
 
@@ -415,21 +513,145 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                      Card Template
-                    </label>
-                    <select
-                      value={settings.anki.cardTemplate}
-                      onChange={(e) =>
-                        handleAnkiSettingChange("cardTemplate", e.target.value)
-                      }
-                      className="input-field w-full"
-                    >
-                      <option value="basic">Basic (Front/Back)</option>
-                      <option value="cloze">Cloze Deletion</option>
-                    </select>
-                  </div>
+                  {ankiConnected && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                        Anki Note Type
+                      </label>
+                      <select
+                        value={settings.anki.modelName || ""}
+                        onChange={(e) => handleModelChange(e.target.value)}
+                        className="input-field w-full"
+                        disabled={loadingModels}
+                      >
+                        <option value="" disabled>
+                          {loadingModels
+                            ? "Loading models..."
+                            : "Select a note type"}
+                        </option>
+                        {availableModels.map((model) => (
+                          <option key={model.name} value={model.name}>
+                            {model.name}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Select the Anki note type to use for your cards
+                      </p>
+                    </div>
+                  )}
+
+                  {ankiConnected && settings.anki.modelName && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+                          Field Mappings
+                        </label>
+                        <button
+                          onClick={addFieldMapping}
+                          className="text-xs bg-primary-500 hover:bg-primary-600 text-white px-3 py-1 rounded transition-colors"
+                        >
+                          Add Mapping
+                        </button>
+                      </div>
+
+                      <div className="space-y-3 max-h-48 overflow-y-auto">
+                        {settings.anki.fieldMappings?.map((mapping, index) => {
+                          const selectedModel = availableModels.find(
+                            (m) => m.name === settings.anki.modelName,
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-slate-700 rounded"
+                            >
+                              <div className="flex-1">
+                                <select
+                                  value={mapping.dicionarioField}
+                                  onChange={(e) =>
+                                    handleFieldMappingChange(
+                                      index,
+                                      "dicionarioField",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="input-field w-full text-xs"
+                                >
+                                  {getDicionarioFieldOptions().map((option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="text-gray-500 dark:text-gray-400">
+                                →
+                              </div>
+                              <div className="flex-1">
+                                <select
+                                  value={mapping.ankiField}
+                                  onChange={(e) =>
+                                    handleFieldMappingChange(
+                                      index,
+                                      "ankiField",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="input-field w-full text-xs"
+                                >
+                                  <option value="">Select Anki field</option>
+                                  {selectedModel?.fields.map((field) => (
+                                    <option key={field} value={field}>
+                                      {field}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <label className="flex items-center space-x-1">
+                                <input
+                                  type="checkbox"
+                                  checked={mapping.includeHtml || false}
+                                  onChange={(e) =>
+                                    handleFieldMappingChange(
+                                      index,
+                                      "includeHtml",
+                                      e.target.checked,
+                                    )
+                                  }
+                                  className="w-3 h-3 text-primary-500 rounded"
+                                />
+                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  HTML
+                                </span>
+                              </label>
+                              <button
+                                onClick={() => removeFieldMapping(index)}
+                                className="text-red-500 hover:text-red-600 text-xs px-2 py-1 rounded"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          );
+                        }) || []}
+                      </div>
+
+                      {(!settings.anki.fieldMappings ||
+                        settings.anki.fieldMappings.length === 0) && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
+                          No field mappings configured. Click "Add Mapping" to
+                          start.
+                        </p>
+                      )}
+
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Map Dicionario data fields to your Anki note type
+                        fields. Enable "HTML" for rich formatting.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
