@@ -134,13 +134,36 @@ ipcMain.handle("anki-get-decks", async () => {
   return ankiService.getDeckNames();
 });
 
-ipcMain.handle("anki-create-card", async (_, card: any, deckName?: string) => {
-  return ankiService.addCard(card, deckName);
+ipcMain.handle("anki-get-models", async () => {
+  return ankiService.getModelsWithFields();
+});
+
+ipcMain.handle("anki-get-model-fields", async (_, modelName: string) => {
+  return ankiService.getModelFieldNames(modelName);
 });
 
 ipcMain.handle(
+  "anki-create-card",
+  async (
+    _,
+    card: any,
+    deckName?: string,
+    modelName?: string,
+    fieldMappings?: any,
+  ) => {
+    return ankiService.addCard(card, deckName, modelName, fieldMappings);
+  },
+);
+
+ipcMain.handle(
   "anki-create-cards",
-  async (_, cards: any[], deckName?: string) => {
-    return ankiService.addCards(cards, deckName);
+  async (
+    _,
+    cards: any[],
+    deckName?: string,
+    modelName?: string,
+    fieldMappings?: any,
+  ) => {
+    return ankiService.addCards(cards, deckName, modelName, fieldMappings);
   },
 );

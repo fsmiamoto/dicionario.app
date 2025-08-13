@@ -1,4 +1,10 @@
-import type { ExamplePhrase, ImageResult } from "@shared/types";
+import type {
+  ExamplePhrase,
+  ImageResult,
+  AnkiFieldMapping,
+  AnkiModelInfo,
+  DicionarioDataType,
+} from "@shared/types";
 
 export interface AnkiCard {
   word: string;
@@ -68,6 +74,8 @@ export class AnkiService {
   async addCard(
     card: AnkiCard,
     deckName: string = "Dicionario::Vocabulary",
+    modelName: string = "Basic",
+    fieldMappings?: AnkiFieldMapping[],
   ): Promise<boolean> {
     try {
       // Ensure the deck exists
@@ -79,7 +87,9 @@ export class AnkiService {
         }
       }
 
-      const cardData = this.formatCard(card);
+      const fields = fieldMappings
+        ? this.formatCardWithMappings(card, fieldMappings)
+        : this.formatCard(card);
 
       const response = await this.sendRequest({
         action: "addNote",
@@ -87,11 +97,8 @@ export class AnkiService {
         params: {
           note: {
             deckName,
-            modelName: "Basic",
-            fields: {
-              Front: cardData.front,
-              Back: cardData.back,
-            },
+            modelName,
+            fields,
             tags: ["dicionario", "vocabulary", card.word.toLowerCase()],
           },
         },
@@ -116,12 +123,19 @@ export class AnkiService {
   async addCards(
     cards: AnkiCard[],
     deckName: string = "Dicionario::Vocabulary",
+    modelName: string = "Basic",
+    fieldMappings?: AnkiFieldMapping[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
     let failed = 0;
 
     for (const card of cards) {
-      const result = await this.addCard(card, deckName);
+      const result = await this.addCard(
+        card,
+        deckName,
+        modelName,
+        fieldMappings,
+      );
       if (result) {
         success++;
       } else {
@@ -132,7 +146,7 @@ export class AnkiService {
     return { success, failed };
   }
 
-  private formatCard(card: AnkiCard): { front: string; back: string } {
+  private formatCard(card: AnkiCard): Record<string, string> {
     const imageHtml = card.image
       ? `<img src="${card.image.thumbnail}" alt="${card.word}" style="max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 16px;">`
       : "";
@@ -173,7 +187,79 @@ export class AnkiService {
       </div>
     `;
 
-    return { front, back };
+    return { Front: front, Back: back };
+  }
+
+  private formatCardWithMappings(
+    card: AnkiCard,
+    fieldMappings: AnkiFieldMapping[],
+  ): Record<string, string> {
+    const fields: Record<string, string> = {};
+
+    for (const mapping of fieldMappings) {
+      const content = this.getDicionarioFieldContent(
+        card,
+        mapping.dicionarioField,
+      );
+      if (content !== null) {
+        fields[mapping.ankiField] = mapping.includeHtml
+          ? this.formatWithHtml(content, mapping.dicionarioField)
+          : content;
+      }
+    }
+
+    return fields;
+  }
+
+  private getDicionarioFieldContent(
+    card: AnkiCard,
+    fieldType: DicionarioDataType,
+  ): string | null {
+    switch (fieldType) {
+      case "word":
+        return card.word;
+      case "explanation":
+        return card.explanation || null;
+      case "phrase_text":
+        return card.phrase.text;
+      case "phrase_translation":
+        return card.phrase.translation;
+      case "phrase_category":
+        return card.phrase.category;
+      case "image":
+        return card.image ? card.image.thumbnail : null;
+      case "audio":
+        return card.audioUrl || null;
+      default:
+        return null;
+    }
+  }
+
+  private formatWithHtml(
+    content: string,
+    fieldType: DicionarioDataType,
+  ): string {
+    switch (fieldType) {
+      case "word":
+        return `<h2 style="color: #2563eb; margin: 16px 0; font-size: 2rem; font-weight: bold;">${content}</h2>`;
+      case "explanation":
+        return `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
+                  <h3 style="margin: 0 0 8px 0; color: #1e40af;">Explanation</h3>
+                  <p style="margin: 0; color: #374151;">${content}</p>
+                </div>`;
+      case "phrase_text":
+        return `<p style="margin: 0 0 8px 0; font-weight: 500; color: #1e293b;">${content}</p>`;
+      case "phrase_translation":
+        return `<p style="margin: 0; font-style: italic; color: #64748b;">${content}</p>`;
+      case "phrase_category":
+        return `<span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; margin-top: 8px;">${content}</span>`;
+      case "image":
+        return `<img src="${content}" alt="Word illustration" style="max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 16px;">`;
+      case "audio":
+        return `<audio controls style="width: 100%; margin-top: 16px;"><source src="${content}" type="audio/mpeg">Your browser does not support the audio element.</audio>`;
+      default:
+        return content;
+    }
   }
 
   private async addAudioToCard(
@@ -238,6 +324,23 @@ export class AnkiService {
       return response.error === null ? response.result : [];
     } catch (error) {
       console.error("Failed to get model field names:", error);
+      return [];
+    }
+  }
+
+  async getModelsWithFields(): Promise<AnkiModelInfo[]> {
+    try {
+      const modelNames = await this.getModelNames();
+      const modelsWithFields: AnkiModelInfo[] = [];
+
+      for (const modelName of modelNames) {
+        const fields = await this.getModelFieldNames(modelName);
+        modelsWithFields.push({ name: modelName, fields });
+      }
+
+      return modelsWithFields;
+    } catch (error) {
+      console.error("Failed to get models with fields:", error);
       return [];
     }
   }
