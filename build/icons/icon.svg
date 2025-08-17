@@ -1,0 +1,27 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="appGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="8" dy="12" stdDeviation="24" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Background with app gradient -->
+  <rect width="1024" height="1024" rx="180" ry="180" fill="url(#appGradient)" filter="url(#shadow)"/>
+  
+  <!-- Open Book Icon - matching the interface exactly -->
+  <g transform="translate(512, 512)">
+    <!-- Book icon path from the interface -->
+    <path
+      d="M0 -187.669v346.676M0 -187.669C-31.168 -212.369 -61.504 -226.669 -100 -226.669s-68.832 14.3-100 39v346.676C-168.832 134.307 -138.496 120.007 -100 120.007s68.832 14.3 100 39M0 -187.669C31.168 -212.369 61.504 -226.669 100 -226.669c38.496 0 68.832 14.3 100 39v346.676C168.832 134.307 138.496 120.007 100 120.007c-38.496 0-68.832 14.3-100 39"
+      stroke="white"
+      stroke-width="32"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+  </g>
+</svg>
