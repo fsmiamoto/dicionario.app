@@ -202,9 +202,15 @@ export class AnkiService {
         mapping.dicionarioField,
       );
       if (content !== null) {
-        fields[mapping.ankiField] = mapping.includeHtml
+        const formattedContent = mapping.includeHtml
           ? this.formatWithHtml(content, mapping.dicionarioField)
           : content;
+
+        if (fields[mapping.ankiField]) {
+          fields[mapping.ankiField] += ` | ${formattedContent}`;
+        } else {
+          fields[mapping.ankiField] = formattedContent;
+        }
       }
     }
 

@@ -186,6 +186,102 @@ describe("AnkiService Field Mapping", () => {
         // Back should not be present since explanation is null
       });
     });
+
+    it("should merge multiple fields mapping to the same Anki field", () => {
+      const formatCardWithMappings = (
+        ankiService as any
+      ).formatCardWithMappings.bind(ankiService);
+
+      const mappings: AnkiFieldMapping[] = [
+        {
+          dicionarioField: "phrase_text",
+          ankiField: "Front",
+          includeHtml: false,
+        },
+        {
+          dicionarioField: "phrase_translation",
+          ankiField: "Front",
+          includeHtml: false,
+        },
+        {
+          dicionarioField: "phrase_category",
+          ankiField: "Front",
+          includeHtml: false,
+        },
+      ];
+
+      const result = formatCardWithMappings(mockCard, mappings);
+
+      expect(result).toEqual({
+        Front: "Hello, how are you? | Olá, como você está? | Greeting/Social",
+      });
+    });
+
+    it("should merge HTML and plain text content when mapping to same field", () => {
+      const formatCardWithMappings = (
+        ankiService as any
+      ).formatCardWithMappings.bind(ankiService);
+
+      const mappings: AnkiFieldMapping[] = [
+        { dicionarioField: "word", ankiField: "Combined", includeHtml: true },
+        {
+          dicionarioField: "phrase_text",
+          ankiField: "Combined",
+          includeHtml: false,
+        },
+        {
+          dicionarioField: "explanation",
+          ankiField: "Combined",
+          includeHtml: true,
+        },
+      ];
+
+      const result = formatCardWithMappings(mockCard, mappings);
+
+      expect(result.Combined).toContain('<h2 style="color: #2563eb');
+      expect(result.Combined).toContain("hello");
+      expect(result.Combined).toContain(" | Hello, how are you? | ");
+      expect(result.Combined).toContain('<div style="background: #f8fafc');
+      expect(result.Combined).toContain(
+        "A greeting used to acknowledge someone",
+      );
+    });
+
+    it("should merge fields correctly when some values are null", () => {
+      const formatCardWithMappings = (
+        ankiService as any
+      ).formatCardWithMappings.bind(ankiService);
+      const cardWithNullValues = {
+        ...mockCard,
+        explanation: null,
+        audioUrl: null,
+      };
+
+      const mappings: AnkiFieldMapping[] = [
+        { dicionarioField: "word", ankiField: "MainField", includeHtml: false },
+        {
+          dicionarioField: "explanation",
+          ankiField: "MainField",
+          includeHtml: false,
+        },
+        {
+          dicionarioField: "phrase_text",
+          ankiField: "MainField",
+          includeHtml: false,
+        },
+        {
+          dicionarioField: "audio",
+          ankiField: "MainField",
+          includeHtml: false,
+        },
+      ];
+
+      const result = formatCardWithMappings(cardWithNullValues, mappings);
+
+      expect(result).toEqual({
+        MainField: "hello | Hello, how are you?",
+      });
+    });
   });
 
   describe("getModelsWithFields", () => {

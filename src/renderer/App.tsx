@@ -54,7 +54,6 @@ function App() {
     loadSettings();
   }, []);
 
-  // Check favorite status when current word changes
   useEffect(() => {
     if (currentWord) {
       const checkFavoriteStatus = async () => {
@@ -94,16 +93,13 @@ function App() {
   };
 
   const handleSearchFromHistory = (word: string) => {
-    // Navigate to search page first
     setCurrentPage("search");
-    // Then perform the search
     handleSearch(word);
   };
 
   const handleAnkiModeToggle = () => {
     setAnkiMode(!ankiMode);
     if (ankiMode) {
-      // Reset selections when exiting Anki mode
       setSelectedPhrases([]);
       setSelectedImages([]);
     }
@@ -160,14 +156,11 @@ function App() {
               hasPrevious: false,
             };
 
-      // Handle phrases result
       const phraseResults = phrases.status === "fulfilled" ? phrases.value : [];
 
-      // Handle explanation result
       const explanationResult =
         wordExplanation.status === "fulfilled" ? wordExplanation.value : null;
 
-      // Log any failures for debugging
       if (images.status === "rejected") {
         console.error("Images search failed:", images.reason);
       }

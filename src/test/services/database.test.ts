@@ -197,6 +197,26 @@ describe("DatabaseService", () => {
           cardTemplate: "basic",
           includeAudio: true,
           includeImages: true,
+          modelName: "Basic",
+          fieldMappings: [
+            { dicionarioField: "word", ankiField: "Front", includeHtml: true },
+            {
+              dicionarioField: "explanation",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            {
+              dicionarioField: "phrase_text",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            {
+              dicionarioField: "phrase_translation",
+              ankiField: "Back",
+              includeHtml: true,
+            },
+            { dicionarioField: "image", ankiField: "Back", includeHtml: true },
+          ],
         },
       });
     });
