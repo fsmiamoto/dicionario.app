@@ -5,46 +5,11 @@ Dicionario is an AI-powered vocabulary learning companion built with Electron, R
 
 It provides visual context, intelligent explanations, and example phrases with audio pronunciation for vocabulary words.
 
-## Required Workflow
-1. **Always build a plan first** - Use the TodoWrite tool to create a detailed plan before starting any coding work
-  - The plan should include low-level details of the actual changes in the code.
-2. **Confirm plan with user** - Present the plan and wait for user approval before proceeding
-3. **Execute the plan** - Implement changes step by step, updating todo status as you progress
-4. **Quality check** - After finishing, ask the user if the changes look good
-5. **Commit changes** - Only commit after user approval
-
 ## Code Guidance
 - DON'T add comments unless explicitely asked too
     - The code should speak for itself
 - When creating a new component, check how the current components are written and follow the same conventions.
 - Include Unit Tests for all new code introduced.
-
-## Git
-- DON'T add that Claude wrote the code in the commit messages
-- Each PR should only have one commit, if you need to make changes, amend the latest commit
-
-## Project Structure
-```
-src/
-├── main/               # Electron main process
-│   ├── main.ts        # Application entry point
-│   ├── preload.ts     # IPC bridge
-│   └── services/      # Backend services
-│       ├── database.ts # SQLite operations
-│       ├── search.ts   # Image search & LLM integration
-│       ├── tts.ts      # Text-to-speech service
-│       └── providers/  # API providers (OpenAI, Google, etc.)
-├── renderer/          # React frontend
-│   ├── components/    # UI components
-│   ├── App.tsx       # Main app component
-│   ├── main.tsx      # React entry point
-│   └── utils/        # Frontend utilities
-├── shared/           # Shared types and utilities
-│   └── types.ts      # TypeScript interfaces
-└── test/            # Unit tests
-    ├── components/  # Component tests
-    └── services/    # Service tests
-```
 
 ## Development Commands
 - `npm run dev` - Start development server (both main and renderer processes)
