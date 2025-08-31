@@ -5,6 +5,7 @@ import type {
   AnkiModelInfo,
   DicionarioDataType,
 } from "@shared/types";
+import { HashUtils } from "../../shared/utils/HashUtils";
 
 export interface AnkiCard {
   word: string;
@@ -28,6 +29,34 @@ export interface AnkiConnectResponse {
 export class AnkiService {
   private readonly ANKI_CONNECT_URL = "http://127.0.0.1:8765";
   private readonly API_VERSION = 6;
+
+  private async processMarkdown(content: string): Promise<string> {
+    try {
+      // Dynamic import to handle ES module
+      const { marked } = await import("marked");
+
+      // Configure marked for Anki card compatibility
+      marked.setOptions({
+        breaks: true, // Convert line breaks to <br>
+        gfm: true, // Enable GitHub Flavored Markdown
+      });
+
+      // Convert markdown to HTML and clean up for Anki
+      const html = marked(content) as string;
+
+      // Remove wrapping <p> tags if content is single paragraph
+      return html.replace(/^<p>(.*)<\/p>\s*$/s, "$1");
+    } catch (error) {
+      console.error("Failed to process markdown:", error);
+      // Fallback to original content if markdown processing fails
+      return content;
+    }
+  }
+
+  private generateAudioFilename(phraseText: string): string {
+    const hash = HashUtils.generateHash(phraseText, 12);
+    return `${hash}_audio.mp3`;
+  }
 
   async testConnection(): Promise<boolean> {
     try {
@@ -88,8 +117,8 @@ export class AnkiService {
       }
 
       const fields = fieldMappings
-        ? this.formatCardWithMappings(card, fieldMappings)
-        : this.formatCard(card);
+        ? await this.formatCardWithMappings(card, fieldMappings)
+        : await this.formatCard(card);
 
       const response = await this.sendRequest({
         action: "addNote",
@@ -110,7 +139,11 @@ export class AnkiService {
 
       // If audio is provided, add it to the card
       if (card.audioUrl && response.result) {
-        await this.addAudioToCard(response.result, card.audioUrl, card.word);
+        await this.addAudioToCard(
+          response.result,
+          card.audioUrl,
+          card.phrase.text,
+        );
       }
 
       return true;
@@ -146,13 +179,13 @@ export class AnkiService {
     return { success, failed };
   }
 
-  private formatCard(card: AnkiCard): Record<string, string> {
+  private async formatCard(card: AnkiCard): Promise<Record<string, string>> {
     const imageHtml = card.image
       ? `<img src="${card.image.thumbnail}" alt="${card.word}" style="max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 16px;">`
       : "";
 
     const audioHtml = card.audioUrl
-      ? `<audio controls style="width: 100%; margin-top: 16px;"><source src="${card.audioUrl}" type="audio/mpeg">Your browser does not support the audio element.</audio>`
+      ? `[sound:${this.generateAudioFilename(card.phrase.text)}]`
       : "";
 
     const front = `
@@ -167,18 +200,27 @@ export class AnkiService {
         ${imageHtml}
         <h2 style="color: #2563eb; margin: 16px 0 24px 0; font-size: 2rem; font-weight: bold;">${card.word}</h2>
         
-        ${
-          card.explanation
-            ? `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
+        ${card.explanation
+        ? `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
                  <h3 style="margin: 0 0 8px 0; color: #1e40af;">Explanation</h3>
-                 <p style="margin: 0; color: #374151;">${card.explanation}</p>
+                 <div style="margin: 0; color: #374151;">${await this.processMarkdown(card.explanation)}</div>
                </div>`
-            : ""
-        }
+        : ""
+      }
         
         <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 16px; margin: 16px 0; border-radius: 4px;">
           <h3 style="margin: 0 0 8px 0; color: #0369a1;">Example Phrase</h3>
-          <p style="margin: 0 0 8px 0; font-weight: 500; color: #1e293b;">${card.phrase.text}</p>
+          <div style="
+            background: #f0f9ff; 
+            color: #0c4a6e; 
+            padding: 10px 14px; 
+            margin: 4px 0 8px 0; 
+            border-radius: 6px; 
+            font-weight: 500; 
+            border: 1px solid #bae6fd;
+          ">
+            ${await this.processMarkdown(card.phrase.text)}
+          </div>
           <p style="margin: 0; font-style: italic; color: #64748b;">${card.phrase.translation}</p>
           <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; margin-top: 8px;">${card.phrase.category}</span>
         </div>
@@ -190,10 +232,10 @@ export class AnkiService {
     return { Front: front, Back: back };
   }
 
-  private formatCardWithMappings(
+  private async formatCardWithMappings(
     card: AnkiCard,
     fieldMappings: AnkiFieldMapping[],
-  ): Record<string, string> {
+  ): Promise<Record<string, string>> {
     const fields: Record<string, string> = {};
 
     for (const mapping of fieldMappings) {
@@ -203,7 +245,7 @@ export class AnkiService {
       );
       if (content !== null) {
         const formattedContent = mapping.includeHtml
-          ? this.formatWithHtml(content, mapping.dicionarioField)
+          ? await this.formatWithHtml(content, mapping.dicionarioField, card)
           : content;
 
         if (fields[mapping.ankiField]) {
@@ -241,20 +283,31 @@ export class AnkiService {
     }
   }
 
-  private formatWithHtml(
+  private async formatWithHtml(
     content: string,
     fieldType: DicionarioDataType,
-  ): string {
+    card: AnkiCard,
+  ): Promise<string> {
     switch (fieldType) {
       case "word":
         return `<h2 style="color: #2563eb; margin: 16px 0; font-size: 2rem; font-weight: bold;">${content}</h2>`;
       case "explanation":
         return `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
                   <h3 style="margin: 0 0 8px 0; color: #1e40af;">Explanation</h3>
-                  <p style="margin: 0; color: #374151;">${content}</p>
+                  <div style="margin: 0; color: #374151;">${await this.processMarkdown(content)}</div>
                 </div>`;
       case "phrase_text":
-        return `<p style="margin: 0 0 8px 0; font-weight: 500; color: #1e293b;">${content}</p>`;
+        return `<div style="
+          background: #f8fafc; 
+          color: #1e293b; 
+          padding: 12px 16px; 
+          margin: 8px 0; 
+          border-radius: 6px; 
+          border: 1px solid #e2e8f0; 
+          font-weight: 500;
+        ">
+          ${await this.processMarkdown(content)}
+        </div>`;
       case "phrase_translation":
         return `<p style="margin: 0; font-style: italic; color: #64748b;">${content}</p>`;
       case "phrase_category":
@@ -262,7 +315,8 @@ export class AnkiService {
       case "image":
         return `<img src="${content}" alt="Word illustration" style="max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 16px;">`;
       case "audio":
-        return `<audio controls style="width: 100%; margin-top: 16px;"><source src="${content}" type="audio/mpeg">Your browser does not support the audio element.</audio>`;
+        // Use the phrase text from context to generate consistent filename
+        return `[sound:${this.generateAudioFilename(card.phrase.text)}]`;
       default:
         return content;
     }
@@ -271,14 +325,14 @@ export class AnkiService {
   private async addAudioToCard(
     noteId: number,
     audioUrl: string,
-    filename: string,
+    phraseText: string,
   ): Promise<void> {
     try {
       await this.sendRequest({
         action: "storeMediaFile",
         version: this.API_VERSION,
         params: {
-          filename: `${filename}_audio.mp3`,
+          filename: this.generateAudioFilename(phraseText),
           data: audioUrl.replace(/^data:audio\/[^;]+;base64,/, ""), // Remove data URL prefix if present
         },
       });
