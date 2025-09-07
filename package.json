@@ -1,6 +1,6 @@
 {
   "name": "dicionario",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AI-powered vocabulary learning companion with visual context and explanations",
   "main": "dist/main/main.js",
   "homepage": "./",
