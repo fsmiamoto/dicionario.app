@@ -75,7 +75,11 @@ describe("ExamplePhrases", () => {
     const descriptiveTag = screen.getByText("Descriptive/Aesthetic");
     const practicalTag = screen.getByText("Practical/Work");
 
-    expect(descriptiveTag).toHaveClass("bg-purple-500/20", "text-purple-300");
-    expect(practicalTag).toHaveClass("bg-blue-500/20", "text-blue-300");
+    // Expect current component classes (light + dark support)
+    expect(descriptiveTag).toHaveClass(
+      "bg-purple-100",
+      "text-purple-800",
+    );
+    expect(practicalTag).toHaveClass("bg-blue-100", "text-blue-800");
   });
 });

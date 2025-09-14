@@ -29,7 +29,7 @@ describe("PromptsManager", () => {
       const prompt = promptsManager.getPromptTemplate("explanation-generation");
       expect(prompt).toBeDefined();
       expect(prompt.system).toContain("educational explanations");
-      expect(prompt.user).toContain("Explain in English");
+      expect(prompt.user).toContain("Explain in {{outputLanguage}}");
     });
 
     it("should cache loaded prompts", () => {
@@ -58,12 +58,15 @@ describe("PromptsManager", () => {
         {
           word: "hola",
           targetLanguage: "Spanish",
+          outputLanguage: "English",
+          isMonolingual: "false",
         },
       );
 
       expect(result.systemPrompt).toContain("Spanish");
       expect(result.userPrompt).toContain("hola");
       expect(result.systemPrompt).not.toContain("{{targetLanguage}}");
+      expect(result.userPrompt).toContain("Explain in English");
       expect(result.userPrompt).not.toContain("{{word}}");
     });
 

@@ -93,7 +93,10 @@ export interface AppSettings {
   googleSearchEngineId?: string;
   openaiApiKey?: string;
   claudeApiKey?: string;
-  preferredLanguage: string;
+  // ISO 639-1 code of the learner's target language (e.g., "en", "es", "ja")
+  targetLanguageCode: string;
+  // If true, explanations are written in the target language with simplified wording
+  monolingualExplanations?: boolean;
   imageSearchProvider: "google" | "auto";
   voiceSettings: {
     provider: "openai" | "google" | "web";

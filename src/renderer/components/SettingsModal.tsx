@@ -13,7 +13,8 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [settings, setSettings] = useState<AppSettings>({
-    preferredLanguage: "en",
+    targetLanguageCode: "en",
+    monolingualExplanations: false,
     imageSearchProvider: "auto",
     voiceSettings: {
       provider: "web",
@@ -62,7 +63,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setSettings((prev) => ({
       ...prev,
       [field]: value,
@@ -283,12 +284,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             </h3>
             <div>
               <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                Preferred Language
+                Target Language
               </label>
               <select
-                value={settings.preferredLanguage}
+                value={settings.targetLanguageCode}
                 onChange={(e) =>
-                  handleInputChange("preferredLanguage", e.target.value)
+                  handleInputChange("targetLanguageCode", e.target.value)
                 }
                 className="input-field w-full"
               >
@@ -303,6 +304,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 <option value="zh">Chinese</option>
               </select>
             </div>
+
+            <div className="mt-3 flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="monolingual-explanations"
+                checked={Boolean(settings.monolingualExplanations)}
+                onChange={(e) =>
+                  handleInputChange("monolingualExplanations", e.target.checked)
+                }
+                className="w-4 h-4 text-primary-500 bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+              />
+              <label
+                htmlFor="monolingual-explanations"
+                className="text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Monolingual explanations
+              </label>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Explain the target language in the target language using simple words.
+            </p>
           </div>
 
           {/* Image Search Settings */}

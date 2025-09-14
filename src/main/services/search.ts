@@ -63,8 +63,8 @@ export class SearchService {
   ): Promise<ExamplePhrase[]> {
     try {
       if (settings?.openaiApiKey) {
-        const targetLanguage = this.getTargetLanguage(
-          settings.preferredLanguage,
+        const targetLanguage = this.getLanguageNameFromCode(
+          settings.targetLanguageCode,
         );
 
         try {
@@ -83,10 +83,10 @@ export class SearchService {
 
       // Fallback to mock phrases
       console.log("No OpenAI API key or generation failed, using mock phrases");
-      return this.getMockPhrases(word, settings?.preferredLanguage);
+      return this.getMockPhrases(word, settings?.targetLanguageCode);
     } catch (error) {
       console.error("Phrase generation error:", error);
-      return this.getMockPhrases(word, settings?.preferredLanguage);
+      return this.getMockPhrases(word, settings?.targetLanguageCode);
     }
   }
 
@@ -100,14 +100,21 @@ export class SearchService {
 
       if (settings?.openaiApiKey) {
         try {
-          const targetLanguage = this.getTargetLanguage(
-            settings.preferredLanguage,
+          const targetLanguage = this.getLanguageNameFromCode(
+            settings.targetLanguageCode,
           );
-          console.log("Using target language for explanation:", targetLanguage);
+          const isMonolingual = Boolean(settings.monolingualExplanations);
+          const outputLanguage = isMonolingual ? targetLanguage : "English";
+          console.log(
+            "Using languages for explanation:",
+            JSON.stringify({ targetLanguage, outputLanguage, isMonolingual }),
+          );
 
           const explanation = await this.openAI.generateExplanation(
             word,
             targetLanguage,
+            outputLanguage,
+            isMonolingual,
             settings.openaiApiKey,
           );
           console.log(
@@ -227,7 +234,7 @@ export class SearchService {
     return translations[lang] || translations.es;
   }
 
-  private getTargetLanguage(preferredLanguage: string): string {
+  private getLanguageNameFromCode(code: string): string {
     const languageMap: Record<string, string> = {
       es: "Spanish",
       fr: "French",
@@ -237,9 +244,10 @@ export class SearchService {
       ja: "Japanese",
       ko: "Korean",
       zh: "Chinese",
+      en: "English",
     };
 
-    return languageMap[preferredLanguage] || "Spanish";
+    return languageMap[code] || "English";
   }
 
   // Utility method to validate API keys

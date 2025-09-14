@@ -95,14 +95,20 @@ export class OpenAIProvider {
   async generateExplanation(
     word: string,
     targetLanguage: string = "English",
+    outputLanguage: string = "English",
+    isMonolingual: boolean = false,
     apiKey?: string,
   ): Promise<string> {
     try {
       console.log(
         "OpenAI generateExplanation called for word:",
         word,
-        "in language:",
+        "target:",
         targetLanguage,
+        "output:",
+        outputLanguage,
+        "monolingual:",
+        isMonolingual,
       );
 
       if (!apiKey) {
@@ -123,6 +129,8 @@ export class OpenAIProvider {
         this.promptsManager.getRenderedPrompt("explanation-generation", {
           word,
           targetLanguage,
+          outputLanguage,
+          isMonolingual: isMonolingual ? "true" : "false",
         });
 
       const completion = await this.client.chat.completions.create({

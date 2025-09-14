@@ -4,11 +4,12 @@ import type { PromptTemplate, RenderedPrompt } from "@shared/types";
 
 export class PromptsManager {
   private static instance: PromptsManager;
-  private promptsCache = new Map<string, PromptTemplate>();
+  private promptsCache: Map<string, PromptTemplate>;
   private readonly promptsDir: string;
 
   private constructor() {
     this.promptsDir = join(__dirname, "../prompts");
+    this.promptsCache = new Map<string, PromptTemplate>();
   }
 
   public static getInstance(): PromptsManager {

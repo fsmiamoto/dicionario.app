@@ -46,7 +46,8 @@ const mockElectronAPI = {
   ]),
   generateAudio: vi.fn().mockResolvedValue("web-speech-api"),
   getSettings: vi.fn().mockResolvedValue({
-    preferredLanguage: "en",
+    targetLanguageCode: "en",
+    monolingualExplanations: false,
     voiceSettings: { provider: "web", language: "en-US" },
   }),
   saveSettings: vi.fn().mockResolvedValue(undefined),

@@ -250,7 +250,8 @@ export class DatabaseService {
     });
 
     return {
-      preferredLanguage: "en",
+      targetLanguageCode: "en",
+      monolingualExplanations: false,
       imageSearchProvider: "auto",
       voiceSettings: {
         provider: "web",

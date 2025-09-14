@@ -89,39 +89,43 @@ describe("AnkiService Field Mapping", () => {
   });
 
   describe("formatWithHtml", () => {
-    it("should format word with HTML styling", () => {
+    it("should format word with HTML styling", async () => {
       const formatWithHtml = (ankiService as any).formatWithHtml.bind(
         ankiService,
       );
 
-      const result = formatWithHtml("hello", "word");
+      const result = await formatWithHtml("hello", "word", mockCard);
       expect(result).toContain('<h2 style="color: #2563eb');
       expect(result).toContain("hello");
     });
 
-    it("should format explanation with HTML styling", () => {
+    it("should format explanation with HTML styling", async () => {
       const formatWithHtml = (ankiService as any).formatWithHtml.bind(
         ankiService,
       );
 
-      const result = formatWithHtml("A greeting", "explanation");
+      const result = await formatWithHtml("A greeting", "explanation", mockCard);
       expect(result).toContain('<div style="background: #f8fafc');
       expect(result).toContain("Explanation");
       expect(result).toContain("A greeting");
     });
 
-    it("should format image with HTML img tag", () => {
+    it("should format image with HTML img tag", async () => {
       const formatWithHtml = (ankiService as any).formatWithHtml.bind(
         ankiService,
       );
 
-      const result = formatWithHtml("https://example.com/image.jpg", "image");
+      const result = await formatWithHtml(
+        "https://example.com/image.jpg",
+        "image",
+        mockCard,
+      );
       expect(result).toContain('<img src="https://example.com/image.jpg"');
     });
   });
 
   describe("formatCardWithMappings", () => {
-    it("should create fields based on mappings", () => {
+    it("should create fields based on mappings", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -140,7 +144,7 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = formatCardWithMappings(mockCard, mappings);
+      const result = await formatCardWithMappings(mockCard, mappings);
 
       expect(result).toEqual({
         Front: "hello",
@@ -149,7 +153,7 @@ describe("AnkiService Field Mapping", () => {
       });
     });
 
-    it("should apply HTML formatting when enabled", () => {
+    it("should apply HTML formatting when enabled", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -158,13 +162,13 @@ describe("AnkiService Field Mapping", () => {
         { dicionarioField: "word", ankiField: "Front", includeHtml: true },
       ];
 
-      const result = formatCardWithMappings(mockCard, mappings);
+      const result = await formatCardWithMappings(mockCard, mappings);
 
       expect(result.Front).toContain('<h2 style="color: #2563eb');
       expect(result.Front).toContain("hello");
     });
 
-    it("should skip null content", () => {
+    it("should skip null content", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -179,7 +183,10 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = formatCardWithMappings(cardWithoutExplanation, mappings);
+      const result = await formatCardWithMappings(
+        cardWithoutExplanation,
+        mappings,
+      );
 
       expect(result).toEqual({
         Front: "hello",
@@ -187,7 +194,7 @@ describe("AnkiService Field Mapping", () => {
       });
     });
 
-    it("should merge multiple fields mapping to the same Anki field", () => {
+    it("should merge multiple fields mapping to the same Anki field", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -210,14 +217,14 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = formatCardWithMappings(mockCard, mappings);
+      const result = await formatCardWithMappings(mockCard, mappings);
 
       expect(result).toEqual({
         Front: "Hello, how are you? | Olá, como você está? | Greeting/Social",
       });
     });
 
-    it("should merge HTML and plain text content when mapping to same field", () => {
+    it("should merge HTML and plain text content when mapping to same field", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -236,7 +243,7 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = formatCardWithMappings(mockCard, mappings);
+      const result = await formatCardWithMappings(mockCard, mappings);
 
       expect(result.Combined).toContain('<h2 style="color: #2563eb');
       expect(result.Combined).toContain("hello");
@@ -247,7 +254,7 @@ describe("AnkiService Field Mapping", () => {
       );
     });
 
-    it("should merge fields correctly when some values are null", () => {
+    it("should merge fields correctly when some values are null", async () => {
       const formatCardWithMappings = (
         ankiService as any
       ).formatCardWithMappings.bind(ankiService);
@@ -276,7 +283,10 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = formatCardWithMappings(cardWithNullValues, mappings);
+      const result = await formatCardWithMappings(
+        cardWithNullValues,
+        mappings,
+      );
 
       expect(result).toEqual({
         MainField: "hello | Hello, how are you?",

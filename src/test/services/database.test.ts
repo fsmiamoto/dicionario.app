@@ -185,7 +185,8 @@ describe("DatabaseService", () => {
       const result = await dbService.getSettings();
 
       expect(result).toEqual({
-        preferredLanguage: "en",
+        targetLanguageCode: "en",
+        monolingualExplanations: false,
         imageSearchProvider: "auto",
         voiceSettings: {
           provider: "web",
@@ -223,7 +224,7 @@ describe("DatabaseService", () => {
 
     it("parses stored settings correctly", async () => {
       const mockSettings = [
-        { key: "preferredLanguage", value: '"es"' },
+        { key: "targetLanguageCode", value: '"es"' },
         { key: "googleApiKey", value: '"test-key"' },
       ];
 
@@ -243,13 +244,13 @@ describe("DatabaseService", () => {
 
       const result = await dbService.getSettings();
 
-      expect(result.preferredLanguage).toBe("es");
+      expect(result.targetLanguageCode).toBe("es");
       expect(result.googleApiKey).toBe("test-key");
     });
 
     it("saves settings correctly", async () => {
       const settings = {
-        preferredLanguage: "es",
+        targetLanguageCode: "es",
         googleApiKey: "test-key-123",
         voiceSettings: {
           provider: "google" as const,
@@ -261,7 +262,7 @@ describe("DatabaseService", () => {
 
       expect(mockStatement.run).toHaveBeenCalledTimes(3);
       expect(mockStatement.run).toHaveBeenCalledWith([
-        "preferredLanguage",
+        "targetLanguageCode",
         '"es"',
       ]);
       expect(mockStatement.run).toHaveBeenCalledWith([
