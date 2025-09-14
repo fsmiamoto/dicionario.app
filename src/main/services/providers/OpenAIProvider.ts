@@ -125,13 +125,16 @@ export class OpenAIProvider {
 
       console.log("OpenAI client initialized successfully");
 
+      const promptName = isMonolingual
+        ? "explanation-generation-monolingual"
+        : "explanation-generation-bilingual";
+
+      const variables = isMonolingual
+        ? { word, targetLanguage }
+        : { word, targetLanguage, outputLanguage };
+
       const { systemPrompt, userPrompt } =
-        this.promptsManager.getRenderedPrompt("explanation-generation", {
-          word,
-          targetLanguage,
-          outputLanguage,
-          isMonolingual: isMonolingual ? "true" : "false",
-        });
+        this.promptsManager.getRenderedPrompt(promptName, variables as any);
 
       const completion = await this.client.chat.completions.create({
         model: this.MODEL,

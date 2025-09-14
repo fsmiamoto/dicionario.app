@@ -25,11 +25,20 @@ describe("PromptsManager", () => {
       expect(prompt.user).toContain("Generate 5 example sentences");
     });
 
-    it("should load explanation-generation prompt", () => {
-      const prompt = promptsManager.getPromptTemplate("explanation-generation");
+    it("should load bilingual explanation prompt", () => {
+      const prompt = promptsManager.getPromptTemplate(
+        "explanation-generation-bilingual",
+      );
       expect(prompt).toBeDefined();
-      expect(prompt.system).toContain("educational explanations");
       expect(prompt.user).toContain("Explain in {{outputLanguage}}");
+    });
+
+    it("should load monolingual explanation prompt", () => {
+      const prompt = promptsManager.getPromptTemplate(
+        "explanation-generation-monolingual",
+      );
+      expect(prompt).toBeDefined();
+      expect(prompt.user).toContain("Explain in {{targetLanguage}}");
     });
 
     it("should cache loaded prompts", () => {
@@ -52,14 +61,13 @@ describe("PromptsManager", () => {
       expect(result.userPrompt).not.toContain("{{word}}");
     });
 
-    it("should render explanation generation prompt with variables", () => {
+    it("should render bilingual explanation prompt with variables", () => {
       const result = promptsManager.getRenderedPrompt(
-        "explanation-generation",
+        "explanation-generation-bilingual",
         {
           word: "hola",
           targetLanguage: "Spanish",
           outputLanguage: "English",
-          isMonolingual: "false",
         },
       );
 
@@ -67,6 +75,22 @@ describe("PromptsManager", () => {
       expect(result.userPrompt).toContain("hola");
       expect(result.systemPrompt).not.toContain("{{targetLanguage}}");
       expect(result.userPrompt).toContain("Explain in English");
+      expect(result.userPrompt).not.toContain("{{word}}");
+    });
+
+    it("should render monolingual explanation prompt with variables", () => {
+      const result = promptsManager.getRenderedPrompt(
+        "explanation-generation-monolingual",
+        {
+          word: "hola",
+          targetLanguage: "Spanish",
+        },
+      );
+
+      expect(result.systemPrompt).toContain("Spanish");
+      expect(result.userPrompt).toContain("hola");
+      expect(result.userPrompt).toContain("Explain in Spanish");
+      expect(result.systemPrompt).not.toContain("{{targetLanguage}}");
       expect(result.userPrompt).not.toContain("{{word}}");
     });
 
