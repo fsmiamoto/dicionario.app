@@ -15,7 +15,8 @@
     "electron:prod": "electron .",
     "pack": "electron-builder",
     "format": "prettier --write src/**/*",
-    "test": "vitest",
+    "test": "vitest --run",
+    "test:watch": "vitest -w",
     "test:ui": "vitest --ui"
   },
   "keywords": [
