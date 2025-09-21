@@ -323,7 +323,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </label>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              Explain the target language in the target language using simple words.
+              Explain the target language in the target language using simple
+              words.
             </p>
           </div>
 

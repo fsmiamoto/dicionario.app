@@ -76,10 +76,7 @@ describe("ExamplePhrases", () => {
     const practicalTag = screen.getByText("Practical/Work");
 
     // Expect current component classes (light + dark support)
-    expect(descriptiveTag).toHaveClass(
-      "bg-purple-100",
-      "text-purple-800",
-    );
+    expect(descriptiveTag).toHaveClass("bg-purple-100", "text-purple-800");
     expect(practicalTag).toHaveClass("bg-blue-100", "text-blue-800");
   });
 });

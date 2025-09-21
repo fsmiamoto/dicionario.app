@@ -7,8 +7,11 @@ import ExamplePhrases from "./components/ExamplePhrases";
 import SettingsModal from "./components/SettingsModal";
 import AnkiCardCreator from "./components/AnkiCardCreator";
 import SearchHistoryPage from "./components/SearchHistoryPage";
+import { Toast } from "./components/Toast";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { handleKeyboardShortcut, getModifierKey } from "./utils/keyboard";
+import { useToast } from "./hooks/useToast";
+import { extractHTMLFromReactMarkdown } from "./utils/html";
 import type {
   SearchResult,
   PaginatedImageResult,
@@ -39,6 +42,12 @@ function App() {
   );
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const searchBarRef = useRef<SearchBarRef>(null);
+  const {
+    isVisible: toastVisible,
+    message: toastMessage,
+    showToast,
+    hideToast,
+  } = useToast();
 
   // Load settings on component mount
   useEffect(() => {
@@ -249,6 +258,31 @@ function App() {
     }
   };
 
+  const handleCopyExplanation = async () => {
+    if (!explanation) return;
+
+    try {
+      const htmlContent = extractHTMLFromReactMarkdown(explanation);
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([htmlContent], { type: "text/html" }),
+          "text/plain": new Blob([explanation], { type: "text/plain" }),
+        }),
+      ]);
+
+      showToast("Explanation copied to clipboard");
+    } catch (error) {
+      console.error("Failed to copy explanation:", error);
+      try {
+        await navigator.clipboard.writeText(explanation);
+        showToast("Explanation copied to clipboard");
+      } catch (fallbackError) {
+        console.error("Fallback copy also failed:", fallbackError);
+      }
+    }
+  };
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -275,6 +309,11 @@ function App() {
           key: "p",
           modifierKey: modifierKey as "metaKey" | "ctrlKey",
           handler: handlePasteAndSearch,
+        },
+        {
+          key: "d",
+          modifierKey: modifierKey as "metaKey" | "ctrlKey",
+          handler: handleCopyExplanation,
         },
       ]);
     };
@@ -472,6 +511,12 @@ function App() {
           isOpen={showAnkiCardCreator}
           onClose={() => setShowAnkiCardCreator(false)}
           onCreateCard={handleAnkiCardsCreated}
+        />
+
+        <Toast
+          message={toastMessage}
+          isVisible={toastVisible}
+          onHide={hideToast}
         />
       </div>
     </ThemeProvider>

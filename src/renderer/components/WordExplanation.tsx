@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { extractHTMLFromReactMarkdown } from "../utils/html";
 
 interface WordExplanationProps {
   word: string;
@@ -19,11 +20,26 @@ const WordExplanation: React.FC<WordExplanationProps> = ({
     if (!explanation) return;
 
     try {
-      await navigator.clipboard.writeText(explanation);
+      const htmlContent = extractHTMLFromReactMarkdown(explanation);
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([htmlContent], { type: "text/html" }),
+          "text/plain": new Blob([explanation], { type: "text/plain" }),
+        }),
+      ]);
+
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy explanation:", error);
+      try {
+        await navigator.clipboard.writeText(explanation);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackError) {
+        console.error("Fallback copy also failed:", fallbackError);
+      }
     }
   };
 

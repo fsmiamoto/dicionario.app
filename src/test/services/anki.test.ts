@@ -104,7 +104,11 @@ describe("AnkiService Field Mapping", () => {
         ankiService,
       );
 
-      const result = await formatWithHtml("A greeting", "explanation", mockCard);
+      const result = await formatWithHtml(
+        "A greeting",
+        "explanation",
+        mockCard,
+      );
       expect(result).toContain('<div style="background: #f8fafc');
       expect(result).toContain("Explanation");
       expect(result).toContain("A greeting");
@@ -283,10 +287,7 @@ describe("AnkiService Field Mapping", () => {
         },
       ];
 
-      const result = await formatCardWithMappings(
-        cardWithNullValues,
-        mappings,
-      );
+      const result = await formatCardWithMappings(cardWithNullValues, mappings);
 
       expect(result).toEqual({
         MainField: "hello | Hello, how are you?",

@@ -200,13 +200,14 @@ export class AnkiService {
         ${imageHtml}
         <h2 style="color: #2563eb; margin: 16px 0 24px 0; font-size: 2rem; font-weight: bold;">${card.word}</h2>
         
-        ${card.explanation
-        ? `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
+        ${
+          card.explanation
+            ? `<div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px; margin: 16px 0; border-radius: 4px;">
                  <h3 style="margin: 0 0 8px 0; color: #1e40af;">Explanation</h3>
                  <div style="margin: 0; color: #374151;">${await this.processMarkdown(card.explanation)}</div>
                </div>`
-        : ""
-      }
+            : ""
+        }
         
         <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 16px; margin: 16px 0; border-radius: 4px;">
           <h3 style="margin: 0 0 8px 0; color: #0369a1;">Example Phrase</h3>
